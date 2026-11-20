@@ -16,6 +16,7 @@ import {
   Image as ImageIcon,
   CheckSquare,
   Square,
+  CheckCircle2,
   HelpCircle,
   Building2,
   TrendingUp,
@@ -145,17 +146,17 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   const [afterPhoto, setAfterPhoto] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Auto calculate checklist score
+  // Auto calculate checklist score (1 ta sessiya sweepi bo'lsa ham likvidlik to'liq qondiriladi!)
+  const hasLiquiditySweep = Boolean(asiaSweep || londonSweep || sessionSweep);
+  
   const currentCheckScore = [
-    asiaSweep,
-    londonSweep,
-    sessionSweep,
+    hasLiquiditySweep,
     htfFvgOb,
     ltfConfirmation,
     clearTarget,
     riskShieldOk,
   ].filter(Boolean).length;
-  const currentCheckTotal = 7;
+  const currentCheckTotal = 5;
 
   // Sync state when editing or opening
   useEffect(() => {
@@ -337,8 +338,8 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
       duration: duration.trim() || '10m',
       checklist_score: currentCheckScore,
       checklist_total: currentCheckTotal,
-      discipline: sessionSweep && currentCheckScore >= 5 ? 'A_PLUS' : sessionSweep ? 'PARTIAL' : 'RULE_VIOLATION',
-      session_sweep: sessionSweep,
+      discipline: hasLiquiditySweep && currentCheckScore >= 5 ? 'A_PLUS' : hasLiquiditySweep ? 'PARTIAL' : 'RULE_VIOLATION',
+      session_sweep: hasLiquiditySweep,
       mental_state: mentalState,
       notes: notes.trim(),
       chart_url: chartUrl.trim() || beforePhoto.trim() || '',
@@ -810,23 +811,61 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
             {activeTab === 'checklist' && (
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="font-bold text-white text-sm flex items-center gap-2">
                       <CheckSquare className="w-4 h-4 text-emerald-400" /> Savdodan Oldingi Shartlar (Galochkalar)
                     </span>
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      {currentCheckScore} / {currentCheckTotal} bajarildi
+                    <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
+                      currentCheckScore === 5
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                        : currentCheckScore >= 4
+                          ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}>
+                      {currentCheckScore} / {currentCheckTotal} {currentCheckScore === 5 ? '✨ IDEAL SETUP (100%)' : 'bajarildi'}
                     </span>
                   </div>
-                  <p className="text-slate-400 text-xs mb-4">
-                    Har bir shartni tekshirib galochka qo‘ying. Agar sessiya sweep bo‘lmagan bo‘lsa, qoidani buzmang!
+
+                  <p className="text-slate-400 text-xs mb-3">
+                    Har bir shartni tekshirib galochka qo‘ying. <strong>Asia yoki London sessiyalaridan kamida 1 tasida likvidlik (sweep) olinsa yetarli</strong> — to‘liq 5/5 Ideal Setup hisoblanadi!
                   </p>
+
+                  {/* Liquidity Sweep Status Banner */}
+                  <div className={`mb-3 p-2.5 rounded-xl border flex items-center justify-between transition ${
+                    hasLiquiditySweep 
+                      ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300' 
+                      : 'bg-slate-900 border-slate-800 text-slate-400'
+                  }`}>
+                    <div className="flex items-center gap-2 text-xs">
+                      {hasLiquiditySweep ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-600 shrink-0" />
+                      )}
+                      <span>
+                        {hasLiquiditySweep ? (
+                          <><strong>Sessiya Likvidligi Olingan:</strong> {asiaSweep ? 'Asia' : ''} {asiaSweep && londonSweep ? 'va' : ''} {londonSweep ? 'London' : ''} {!asiaSweep && !londonSweep && sessionSweep ? 'Sessiya' : ''} likvidligi olindi (Ideal setup uchun yetarli)</>
+                        ) : (
+                          <><strong>Likvidlik Sweepi Kerak:</strong> Kamida Asia yoki London sessiyasidan likvidlik olingan bo‘lishi lozim</>
+                        )}
+                      </span>
+                    </div>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                      hasLiquiditySweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'
+                    }`}>
+                      {hasLiquiditySweep ? '1/1 BALL' : '0/1 BALL'}
+                    </span>
+                  </div>
 
                   <div className="space-y-2.5">
                     
                     {/* 1. Asia Sweep */}
                     <div 
-                      onClick={() => setAsiaSweep(!asiaSweep)}
+                      onClick={() => {
+                        const nextVal = !asiaSweep;
+                        setAsiaSweep(nextVal);
+                        if (nextVal) setSessionSweep(true);
+                      }}
                       className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
                         asiaSweep ? 'bg-emerald-950/20 border-emerald-500/40 text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'
                       }`}
@@ -834,18 +873,25 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       <div className="flex items-center gap-3">
                         {asiaSweep ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-slate-600 shrink-0" />}
                         <div>
-                          <strong className="block text-xs">1. Asia Sweep (Osiyo sessiyasi High / Low sweep bo‘ldimi?)</strong>
-                          <span className="text-[11px] text-slate-400">Osiyo likvidligi yechilganmi yoki yo‘q</span>
+                          <strong className="block text-xs flex items-center gap-1.5">
+                            1. Asia Sweep (Osiyo sessiyasi High / Low sweep bo‘ldimi?)
+                            <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.2 rounded font-mono">1 ta sweep yetarli</span>
+                          </strong>
+                          <span className="text-[11px] text-slate-400">Osiyo likvidligi yechilgan bo‘lsa belgilang</span>
                         </div>
                       </div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${asiaSweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
-                        {asiaSweep ? 'HA' : 'YO‘Q'}
+                        {asiaSweep ? 'SWEEP BOR' : 'YO‘Q'}
                       </span>
                     </div>
 
                     {/* 2. London Sweep */}
                     <div 
-                      onClick={() => setLondonSweep(!londonSweep)}
+                      onClick={() => {
+                        const nextVal = !londonSweep;
+                        setLondonSweep(nextVal);
+                        if (nextVal) setSessionSweep(true);
+                      }}
                       className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
                         londonSweep ? 'bg-emerald-950/20 border-emerald-500/40 text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'
                       }`}
@@ -853,16 +899,19 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       <div className="flex items-center gap-3">
                         {londonSweep ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-slate-600 shrink-0" />}
                         <div>
-                          <strong className="block text-xs">2. London Sweep (London sessiyasi High / Low sweep bo‘ldimi?)</strong>
-                          <span className="text-[11px] text-slate-400">London sessiyasi likvidligi olindimi</span>
+                          <strong className="block text-xs flex items-center gap-1.5">
+                            2. London Sweep (London sessiyasi High / Low sweep bo‘ldimi?)
+                            <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.2 rounded font-mono">1 ta sweep yetarli</span>
+                          </strong>
+                          <span className="text-[11px] text-slate-400">London likvidligi yechilgan bo‘lsa belgilang</span>
                         </div>
                       </div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${londonSweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
-                        {londonSweep ? 'HA' : 'YO‘Q'}
+                        {londonSweep ? 'SWEEP BOR' : 'YO‘Q'}
                       </span>
                     </div>
 
-                    {/* 3. Session Sweep (Asosiy) */}
+                    {/* 3. Session Sweep (Boshqa / NY Pre-market) */}
                     <div 
                       onClick={() => setSessionSweep(!sessionSweep)}
                       className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
@@ -873,10 +922,10 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                         {sessionSweep ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-slate-600 shrink-0" />}
                         <div>
                           <strong className="block text-xs flex items-center gap-1.5">
-                            3. Sessiya High / Low Sweep (Asosiy Shart)
-                            <span className="text-[10px] bg-rose-500/20 text-rose-400 px-1.5 py-0.2 rounded font-mono">Majburiy</span>
+                            3. Pre-Market yoki Boshqa Sessiya Sweepi
+                            <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.2 rounded font-mono">Qo‘shimcha</span>
                           </strong>
-                          <span className="text-[11px] text-slate-400">Sweep bo‘lsa belgilang (eng muhim signal)</span>
+                          <span className="text-[11px] text-slate-400">NY Pre-market yoki oldingi kun (PDH/PDL) likvidligi olingan bo‘lsa</span>
                         </div>
                       </div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${sessionSweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>

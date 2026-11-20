@@ -531,7 +531,7 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
                   <CheckSquare className="w-4 h-4 text-emerald-400" />
-                  <span>Strategiya Shartlari ({trade.checklist_score}/{trade.checklist_total || 7})</span>
+                  <span>Strategiya Shartlari ({trade.checklist_score}/{trade.checklist_total || 5})</span>
                 </h4>
                 <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                   (trade.followed_rules !== undefined ? trade.followed_rules : trade.session_sweep)
