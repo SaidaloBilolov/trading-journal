@@ -41,12 +41,10 @@ export const exportTradesToPDF = (
   const largestWin = wins.length > 0 ? Math.max(...wins.map((t) => t.net_pnl)) : 0;
   const largestLoss = losses.length > 0 ? Math.min(...losses.map((t) => t.net_pnl)) : 0;
 
-  // Peak balance & Min balance calculation
+  // Peak balance & Post-Peak Minimum Drawdown calculation
   let running = initialBalance;
   let peakBalance = initialBalance;
-  let minBalance = initialBalance;
   let maxIdx = 0;
-  let minIdx = 0;
   const chronologicalTrades = [...trades].sort(
     (a, b) => new Date(`${a.date}T${a.time || '12:00'}`).getTime() - new Date(`${b.date}T${b.time || '12:00'}`).getTime()
   );
@@ -61,10 +59,6 @@ export const exportTradesToPDF = (
       peakBalance = running;
       maxIdx = i + 1;
     }
-    if (running < minBalance) {
-      minBalance = running;
-      minIdx = i + 1;
-    }
     const currentTrailingDd = peakBalance - trailingDrawdownAmount;
     balancePoints.push({
       xIdx: i + 1,
@@ -74,6 +68,34 @@ export const exportTradesToPDF = (
     });
   });
 
+  // Calculate post-peak trough (Eng chuqur tushish / Maksimal Drawdown nuqtasi)
+  let lowestBalanceAfterPeak = peakBalance;
+  let lowestAfterPeakIdx = maxIdx;
+
+  for (let i = maxIdx; i < balancePoints.length; i++) {
+    if (balancePoints[i].balance < lowestBalanceAfterPeak) {
+      lowestBalanceAfterPeak = balancePoints[i].balance;
+      lowestAfterPeakIdx = i;
+    }
+  }
+
+  // Fallback to lowest overall if peak was reached on the very last trade
+  if (lowestAfterPeakIdx === maxIdx) {
+    let overallMin = initialBalance;
+    let overallMinIdx = 0;
+    balancePoints.forEach((p, idx) => {
+      if (p.balance < overallMin) {
+        overallMin = p.balance;
+        overallMinIdx = idx;
+      }
+    });
+    if (overallMinIdx > 0) {
+      lowestBalanceAfterPeak = overallMin;
+      lowestAfterPeakIdx = overallMinIdx;
+    }
+  }
+
+  const maxDrawdownFromPeak = peakBalance - lowestBalanceAfterPeak;
   const trailingLimit = peakBalance - trailingDrawdownAmount;
   const bufferRemaining = currentBalance - trailingLimit;
 
@@ -149,10 +171,10 @@ export const exportTradesToPDF = (
   drawKpiCard(
     36 + (cardWidth + gap) * 3, 
     kpiTop, 
-    'Minimal Balans (Eng Past)', 
-    `$${minBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
-    `Past: ${minBalance - initialBalance >= 0 ? '+' : ''}$${(minBalance - initialBalance).toFixed(2)}`, 
-    minBalance < initialBalance ? [244, 63, 94] : [15, 23, 42]
+    'Minimal Balans (Pikdan)', 
+    `$${lowestBalanceAfterPeak.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+    `Pikdan DD: -$${maxDrawdownFromPeak.toFixed(2)}`, 
+    [244, 63, 94]
   );
   drawKpiCard(
     36 + (cardWidth + gap) * 4, 
@@ -312,16 +334,25 @@ export const exportTradesToPDF = (
     doc.text(`Pik: $${Math.round(peakBalance).toLocaleString()}`, Math.max(peakX - 16, plotLeft + 4), Math.max(peakY - 5, plotTop + 10));
   }
 
-  // Min Milestone Dot & Label (Minimal Balans)
-  if (minIdx > 0 && minIdx < balancePoints.length && minIdx !== maxIdx) {
-    const minX = getXCoord(minIdx);
-    const minY = getYCoord(minBalance);
-    doc.setFillColor(168, 85, 247); // purple
-    doc.circle(minX, minY, 3.5, 'F');
+  // Minimum Drawdown Milestone Dot & Label (Pikdan keyingi eng chuqur drawdown nuqtasi)
+  if (lowestAfterPeakIdx > 0 && lowestAfterPeakIdx < balancePoints.length && lowestAfterPeakIdx !== maxIdx) {
+    const minX = getXCoord(lowestAfterPeakIdx);
+    const minY = getYCoord(lowestBalanceAfterPeak);
+    
+    // Rose-500 outer dot with white core
+    doc.setFillColor(244, 63, 94);
+    doc.circle(minX, minY, 3.8, 'F');
+    doc.setFillColor(255, 255, 255);
+    doc.circle(minX, minY, 1.4, 'F');
+
     doc.setFontSize(6.5);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(168, 85, 247);
-    doc.text(`Min: $${Math.round(minBalance).toLocaleString()}`, Math.max(minX - 16, plotLeft + 4), Math.min(minY + 9, plotBottom - 4));
+    doc.setTextColor(244, 63, 94);
+    
+    const ddText = `Min: $${Math.round(lowestBalanceAfterPeak).toLocaleString()} (-$${Math.round(maxDrawdownFromPeak).toLocaleString()})`;
+    const labelY = minY + 10 > plotBottom - 2 ? minY - 6 : minY + 9;
+    const labelX = Math.max(minX - 32, plotLeft + 4);
+    doc.text(ddText, labelX, labelY);
   }
 
   // Bottom Timeline Labels
@@ -359,7 +390,7 @@ export const exportTradesToPDF = (
     48, noteY + 28
   );
   doc.text(
-    `• Qoida bo‘yicha to‘liq A+ sdelkalar: ${aPlusTrades} ta. Jami komissiya xarajati: -$${totalCommission.toFixed(2)}. Trailing Drawdown xavfsiz buferi: $${bufferRemaining.toFixed(2)}.`,
+    `• Qoida bo‘yicha to‘liq A+ sdelkalar: ${aPlusTrades} ta. Pikdan keyingi eng chuqur drawdown: -$${maxDrawdownFromPeak.toFixed(2)} (eng past balans: $${lowestBalanceAfterPeak.toFixed(2)}). Xavfsiz bufer: $${bufferRemaining.toFixed(2)}.`,
     48, noteY + 39
   );
 
