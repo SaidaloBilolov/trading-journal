@@ -27,17 +27,37 @@ interface PropAccountModalProps {
   allTrades: Trade[];
 }
 
-const FIRM_OPTIONS = [
-  'Backtest',
+const FOREX_FIRMS = [
+  'FTMO',
+  'FundedNext',
+  'Alpha Capital Group',
+  'Funding Pips',
+  'The Funded Trader (TFT)',
+  'E8 Markets',
+  'The5%ers',
+  'Goat Funded Trader',
+  'Forex Shaxsiy hisob',
+  'Boshqa FX Prop'
+];
+
+const FUTURES_FIRMS = [
   'Tradify',
   'Apex Trader Funding',
   'Topstep',
-  'FundedNext',
   'MyFundedFutures (MFFU)',
-  'Alpha Capital Group',
   'TradeDay',
-  'Shaxsiy / Real hisob',
-  'Boshqa'
+  'Bulenox',
+  'Take Profit Trader',
+  'Futures Shaxsiy hisob',
+  'Boshqa Futures Prop'
+];
+
+const BACKTEST_FIRMS = [
+  'FxReplay',
+  'TradingView Replay',
+  'Tradovate Demo / Replay',
+  'Backtest Jurnali',
+  'Boshqa Backtest'
 ];
 
 export const PropAccountModal: React.FC<PropAccountModalProps> = ({
@@ -60,6 +80,13 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
   const [dailyLossLimit, setDailyLossLimit] = useState<number>(1000);
   const [maxContracts, setMaxContracts] = useState<number>(5);
   const [description, setDescription] = useState('');
+
+  const currentFirms =
+    marketType === 'forex'
+      ? FOREX_FIRMS
+      : marketType === 'backtest'
+        ? BACKTEST_FIRMS
+        : FUTURES_FIRMS;
 
   if (!isOpen) return null;
 
@@ -334,7 +361,9 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                       setMarketType('futures');
                       setDrawdownType('trailing');
                       setTrailingDrawdown(2000);
-                      if (firm === 'FTMO') setFirm('Tradify');
+                      setFirm('Tradify');
+                      if (!name || name.includes('FTMO') || name.includes('Backtest')) setName('Tradify 50K');
+                      setDescription('Futures prop hisobi (Trailing Drawdown ko‘tariladi)');
                     }}
                     className={`p-3 rounded-xl border text-left transition ${
                       marketType === 'futures'
@@ -359,7 +388,9 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                       setMarketType('forex');
                       setDrawdownType('static');
                       setTrailingDrawdown(5000);
-                      if (firm === 'Apex Trader Funding' || firm === 'Tradify') setFirm('FTMO');
+                      setFirm('FTMO');
+                      if (!name || name.includes('Tradify') || name.includes('Apex') || name.includes('Backtest')) setName('FTMO 50K (FX)');
+                      setDescription('Forex / FX prop hisobi (Statik Drawdown ko‘tarilmaydi, qat’iy $45 000 da turadi)');
                     }}
                     className={`p-3 rounded-xl border text-left transition ${
                       marketType === 'forex'
@@ -398,15 +429,24 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
 
                   {/* Prop Firma */}
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                      Prop Firma / Platforma
+                    <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
+                      <span>Prop Firma / Platforma</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                        marketType === 'forex' 
+                          ? 'bg-emerald-500/20 text-emerald-400' 
+                          : marketType === 'backtest' 
+                            ? 'bg-purple-500/20 text-purple-400' 
+                            : 'bg-cyan-500/20 text-cyan-400'
+                      }`}>
+                        {marketType === 'forex' ? '🌐 Forex Prop' : marketType === 'backtest' ? '🧪 Backtest' : '⚡ Futures Prop'}
+                      </span>
                     </label>
                     <select
                       value={firm}
                       onChange={(e) => setFirm(e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
                     >
-                      {FIRM_OPTIONS.map((f) => (
+                      {currentFirms.map((f) => (
                         <option key={f} value={f}>{f}</option>
                       ))}
                     </select>
