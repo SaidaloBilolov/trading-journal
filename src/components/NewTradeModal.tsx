@@ -50,13 +50,26 @@ export const POPULAR_INSTRUMENTS = [
 ];
 
 export const SESSION_OPTIONS = [
-  { value: 'После открытия рынка (9:30)', label: 'После открытия рынка (9:30)' },
-  { value: '13:10 – 13:40 EST', label: '13:10 – 13:40 EST' },
-  { value: 'New York AM (09:30 - 11:30)', label: 'New York AM (09:30 - 11:30)' },
-  { value: 'New York PM (13:30 - 16:00)', label: 'New York PM (13:30 - 16:00)' },
-  { value: 'London sessiyasi (London Open)', label: 'London sessiyasi (London Open)' },
-  { value: 'Asia / Osiyo sessiyasi', label: 'Asia / Osiyo sessiyasi' },
-  { value: 'Pre-Market (08:30 - 09:30)', label: 'Pre-Market (08:30 - 09:30)' },
+  // ICT NY Macros (Boshlanishi va tugashi bilan)
+  { value: '08:50 – 09:10 EST (Pre-Market Macro)', label: '⏰ 08:50 – 09:10 EST (Pre-Market Macro)' },
+  { value: 'После открытия рынка (9:30)', label: '🔔 После открытия рынка (9:30 Open)' },
+  { value: '09:50 – 10:10 EST (NY AM Open Macro)', label: '⏰ 09:50 – 10:10 EST (NY AM Open Macro)' },
+  { value: '10:50 – 11:10 EST (NY AM Continuation Macro)', label: '⏰ 10:50 – 11:10 EST (NY AM Macro)' },
+  { value: '11:50 – 12:10 EST (NY Lunch Macro)', label: '⏰ 11:50 – 12:10 EST (NY Lunch Macro)' },
+  { value: '13:10 – 13:40 EST (NY Afternoon Macro)', label: '⏰ 13:10 – 13:40 EST (Post-Lunch Macro)' },
+  { value: '13:50 – 14:10 EST (NY PM Continuation Macro)', label: '⏰ 13:50 – 14:10 EST (NY PM Macro)' },
+  { value: '15:15 – 15:45 EST (Market Close Macro)', label: '⏰ 15:15 – 15:45 EST (Market Close Macro)' },
+  
+  // ICT London Macros
+  { value: '02:33 – 03:00 EST (London AM Macro)', label: '🇬🇧 02:33 – 03:00 EST (London AM Macro)' },
+  { value: '04:03 – 04:30 EST (London Open Macro)', label: '🇬🇧 04:03 – 04:30 EST (London Open Macro)' },
+  
+  // Standart Sessiyalar
+  { value: 'New York AM (09:30 - 11:30)', label: '🇺🇸 New York AM (09:30 - 11:30)' },
+  { value: 'New York PM (13:30 - 16:00)', label: '🇺🇸 New York PM (13:30 - 16:00)' },
+  { value: 'London sessiyasi (London Open)', label: '🇬🇧 London sessiyasi (03:00 - 11:30)' },
+  { value: 'Asia / Osiyo sessiyasi', label: '🌏 Asia / Osiyo sessiyasi (20:00 - 02:00)' },
+  { value: 'Pre-Market (08:30 - 09:30)', label: '⚡ Pre-Market (08:30 - 09:30)' },
   { value: 'CUSTOM', label: '✏️ Boshqa sessiya (qo‘lda yozish)' },
 ];
 
@@ -575,44 +588,17 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                   </div>
                 </div>
 
-                {/* Date, Time, Qty, Emotion */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Date & Emotion (Vaqt va Kontrakt avtomatik olinadi, ortiqcha yuk yo'q) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-slate-300 font-medium mb-1">
-                      Дата (Sana)
+                      Дата (Sana) <span className="text-emerald-400">*</span>
                     </label>
                     <input
                       type="date"
                       required
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Время (Vaqt)
-                    </label>
-                    <input
-                      type="time"
-                      required
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Qty (Kontrakt)
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      max={10}
-                      value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
                       className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
                     />
                   </div>
@@ -626,16 +612,16 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       onChange={(e) => setMentalState(e.target.value as MentalState)}
                       className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500"
                     >
-                      <option value="NO">NO (Neytral)</option>
-                      <option value="Xotirjam">Xotirjam</option>
-                      <option value="Bozor ochilishiga shoshilish">Shoshilish</option>
+                      <option value="NO">NO (Neytral / Xotirjam)</option>
+                      <option value="Xotirjam">Xotirjam (Reja bo‘yicha)</option>
+                      <option value="Bozor ochilishiga shoshilish">Shoshilish (Open rush)</option>
                       <option value="Yurak siqildi">Yurak siqildi (Fomo)</option>
-                      <option value="Asab / Alam olish">Asab / Alam olish</option>
+                      <option value="Asab / Alam olish">Asab / Alam olish (Revenge)</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Notion Risk & R:R */}
+                {/* Notion Risk & R:R & Natija */}
                 <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-slate-400 font-medium mb-1">
@@ -652,12 +638,13 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
 
                   <div>
                     <label className="block text-slate-400 font-medium mb-1">
-                      SL (Pips / ball: 0 yoki -1)
+                      SL (0 yoki -1)
                     </label>
                     <input
                       type="text"
                       value={slPips}
                       onChange={(e) => setSlPips(e.target.value)}
+                      placeholder="0 yoki -1"
                       className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs"
                     />
                   </div>
@@ -670,6 +657,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       type="text"
                       value={rrRatio}
                       onChange={(e) => setRrRatio(e.target.value)}
+                      placeholder="2.1"
                       className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs"
                     />
                   </div>
@@ -683,123 +671,137 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       onChange={(e) => setResultTag(e.target.value as ResultTag)}
                       className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs"
                     >
-                      <option value="PROFIT">Прибыльная</option>
-                      <option value="LOSS">Убыточная</option>
+                      <option value="PROFIT">Прибыльная (TP)</option>
+                      <option value="LOSS">Убыточная (SL)</option>
                       <option value="BE">БУ (Bezubitok)</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Prices & Calculations */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Вход (Kirish narxi)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="31198.75"
-                      value={entryPrice}
-                      onChange={(e) => setEntryPrice(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs"
-                    />
-                  </div>
+                {/* Asosiy Sof Foyda / Zarar (Net P&L) */}
+                <div className="p-4 rounded-xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border-2 border-emerald-500/40 shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex-1">
+                      <label className="block text-slate-200 font-bold mb-1 text-xs flex items-center gap-1.5">
+                        <DollarSign className="w-4 h-4 text-emerald-400" />
+                        <span>Чистый P&L ($)</span>
+                        <span className="text-emerald-400 font-bold">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        placeholder="+301.41 yoki -100"
+                        value={netPnl}
+                        onChange={(e) => {
+                          setNetPnl(e.target.value);
+                          if (!grossPnl) setGrossPnl(e.target.value);
+                          const n = parseFloat(e.target.value) || 0;
+                          const pct = (n / 50000) * 100;
+                          setPnlPercent(`${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`);
+                          if (n > 0) setResultTag('PROFIT');
+                          else if (n < 0) setResultTag('LOSS');
+                        }}
+                        className="w-full bg-[#131b2e] border border-emerald-500/60 rounded-xl px-3.5 py-2.5 text-white font-mono font-black text-sm focus:outline-none focus:border-emerald-400 shadow-inner"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Stop Loss narxi
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="31183.75"
-                      value={stopLoss}
-                      onChange={(e) => setStopLoss(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Выход (Chiqish narxi)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="31350.50"
-                      value={exitPrice}
-                      onChange={(e) => setExitPrice(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs"
-                    />
+                    <div className="sm:w-44 flex flex-col justify-end">
+                      <span className="text-[11px] text-slate-400 block mb-1">P&L Foizi (Balansdan):</span>
+                      <div className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 font-mono font-bold text-xs text-center text-emerald-400">
+                        {pnlPercent || (netPnl ? `${((parseFloat(netPnl) || 0) / 500).toFixed(2)}%` : '+0.00%')}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Auto calc button */}
-                {entryPrice && exitPrice && (
-                  <button
-                    type="button"
-                    onClick={handleAutoCalculate}
-                    className="w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs flex items-center justify-center gap-1.5 border border-slate-700"
-                  >
-                    <Calculator className="w-3.5 h-3.5" /> Narxlar orqali P&L va R:R ni avtomatik hisoblash
-                  </button>
-                )}
+                {/* Qo'shimcha narxlar va parametrlar (Ixtiyoriy yashirin quti) */}
+                <details className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-xs text-slate-400 group">
+                  <summary className="cursor-pointer text-[11px] font-semibold text-slate-400 hover:text-slate-200 flex items-center justify-between select-none">
+                    <span>⚙️ Qo‘shimcha narxlar va kontrakt (ixtiyoriy)</span>
+                    <span className="text-[10px] text-slate-500 font-mono group-open:rotate-180 transition-transform">▼</span>
+                  </summary>
+                  
+                  <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Vaqt:</label>
+                        <input
+                          type="time"
+                          value={time}
+                          onChange={(e) => setTime(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Kontrakt (Qty):</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={quantity}
+                          onChange={(e) => setQuantity(Number(e.target.value))}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Komissiya ($):</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={commission}
+                          onChange={(e) => setCommission(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Yalpi Gross ($):</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={grossPnl}
+                          onChange={(e) => setGrossPnl(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                    </div>
 
-                {/* P&L Outputs */}
-                <div className="p-4 rounded-xl bg-[#070b14] border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-slate-400 font-medium mb-1">
-                      Итог (Yalpi Gross P&L $)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="302.65"
-                      value={grossPnl}
-                      onChange={(e) => handleGrossChange(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs"
-                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Kirish narxi:</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="31198.75"
+                          value={entryPrice}
+                          onChange={(e) => setEntryPrice(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Stop Loss narxi:</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="31183.75"
+                          value={stopLoss}
+                          onChange={(e) => setStopLoss(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-500 mb-0.5">Chiqish narxi:</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="31350.50"
+                          value={exitPrice}
+                          onChange={(e) => setExitPrice(e.target.value)}
+                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                        />
+                      </div>
+                    </div>
                   </div>
-
-                  <div>
-                    <label className="block text-slate-400 font-medium mb-1">
-                      Комиссия ($)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={commission}
-                      onChange={(e) => {
-                        setCommission(e.target.value);
-                        const g = parseFloat(grossPnl) || 0;
-                        const c = parseFloat(e.target.value) || 0;
-                        setNetPnl((g - c).toFixed(2));
-                      }}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 font-medium mb-1">
-                      Чистый P&L ($) <span className="text-emerald-400">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      placeholder="+301.41 yoki -100.09"
-                      value={netPnl}
-                      onChange={(e) => {
-                        setNetPnl(e.target.value);
-                        const n = parseFloat(e.target.value) || 0;
-                        const pct = (n / 50000) * 100;
-                        setPnlPercent(`${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`);
-                      }}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono font-bold text-xs"
-                    />
-                  </div>
-                </div>
+                </details>
 
               </div>
             )}
@@ -1077,12 +1079,14 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                       />
                     )}
 
-                    {/* Quick Session Badges */}
+                    {/* Quick Session & Macro Badges */}
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {[
                         { v: 'После открытия рынка (9:30)', l: '9:30 Open' },
-                        { v: '13:10 – 13:40 EST', l: '13:10–13:40' },
-                        { v: 'New York AM (09:30 - 11:30)', l: 'NY AM' },
+                        { v: '09:50 – 10:10 EST (NY AM Open Macro)', l: '09:50-10:10 Macro' },
+                        { v: '10:50 – 11:10 EST (NY AM Continuation Macro)', l: '10:50-11:10 Macro' },
+                        { v: '13:10 – 13:40 EST (NY Afternoon Macro)', l: '13:10-13:40 Macro' },
+                        { v: '13:50 – 14:10 EST (NY PM Continuation Macro)', l: '13:50-14:10 Macro' },
                         { v: 'London sessiyasi (London Open)', l: 'London' },
                       ].map((s) => (
                         <button

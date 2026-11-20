@@ -22,6 +22,7 @@ interface AnalyticsChartsProps {
   initialBalance?: number;
   trailingDrawdown?: number;
   accountName?: string;
+  drawdownType?: 'trailing' | 'static';
 }
 
 export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ 
@@ -29,7 +30,8 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
   settings,
   initialBalance,
   trailingDrawdown = 2000,
-  accountName = 'Tradify 50K'
+  accountName = 'Tradify 50K',
+  drawdownType = 'trailing'
 }) => {
   // View mode for Equity Curve: 'daily' (Default - user requested) vs 'trades' (Micro)
   const [viewMode, setViewMode] = useState<'daily' | 'trades'>('daily');
@@ -38,6 +40,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
 
   const initBal = initialBalance || settings.initial_balance || 50000;
   const trailingAmount = trailingDrawdown || 2000;
+  const isStaticDD = drawdownType === 'static';
 
   // Chronologically sorted trades for proper timeline
   const sortedTrades = useMemo(() => {
@@ -78,7 +81,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
         tradesCount: 0,
         balance: runningBalance,
         peakBalance: peakBalance,
-        drawdownLimit: peakBalance - trailingAmount,
+        drawdownLimit: isStaticDD ? (initBal - trailingAmount) : (peakBalance - trailingAmount),
         buffer: trailingAmount,
       },
     ];
@@ -88,7 +91,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
       if (runningBalance > peakBalance) {
         peakBalance = runningBalance;
       }
-      const ddLimit = peakBalance - trailingAmount;
+      const ddLimit = isStaticDD ? (initBal - trailingAmount) : (peakBalance - trailingAmount);
       points.push({
         index: i + 1,
         tradeId: `day-${d.date}`,
@@ -105,7 +108,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
     });
 
     return points;
-  }, [dailyPnL, initBal, trailingAmount]);
+  }, [dailyPnL, initBal, trailingAmount, isStaticDD]);
 
   // 2. Micro Trade-by-trade Equity Points
   const tradeEquityPoints = useMemo(() => {
@@ -123,7 +126,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
         tradesCount: 0,
         balance: runningBalance,
         peakBalance: peakBalance,
-        drawdownLimit: peakBalance - trailingAmount,
+        drawdownLimit: isStaticDD ? (initBal - trailingAmount) : (peakBalance - trailingAmount),
         buffer: trailingAmount,
       },
     ];
@@ -133,7 +136,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
       if (runningBalance > peakBalance) {
         peakBalance = runningBalance;
       }
-      const ddLimit = peakBalance - trailingAmount;
+      const ddLimit = isStaticDD ? (initBal - trailingAmount) : (peakBalance - trailingAmount);
       points.push({
         index: i + 1,
         tradeId: t.id,

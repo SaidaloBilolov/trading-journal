@@ -44,6 +44,25 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
   const [isEditingLink, setIsEditingLink] = useState(false);
   const [linkSavedToast, setLinkSavedToast] = useState(false);
 
+  // 3-Stage Photo states
+  const [editingPhotoStage, setEditingPhotoStage] = useState<'before' | 'inTrade' | 'after' | null>(null);
+  const [photoInputUrl, setPhotoInputUrl] = useState('');
+
+  const handleSavePhotoUrl = (field: 'before_photo' | 'in_trade_photo' | 'after_photo', url: string) => {
+    if (!trade) return;
+    const updatedTrade: Trade = {
+      ...trade,
+      [field]: url.trim(),
+    };
+    if (field === 'before_photo') {
+      updatedTrade.chart_url = url.trim();
+    }
+    onEdit(updatedTrade);
+    setEditingPhotoStage(null);
+    setLinkSavedToast(true);
+    setTimeout(() => setLinkSavedToast(false), 2500);
+  };
+
   useEffect(() => {
     if (trade) {
       setChartLinkInput(trade.chart_url || trade.before_photo || '');
@@ -149,122 +168,362 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
               </div>
             </div>
 
-            {/* ⭐ FOYDALANUVCHI LINKI VA GRAFIK KO'RINIShI ⭐ */}
-            <div className="bg-slate-900/90 border-2 border-emerald-500/30 rounded-3xl p-5 shadow-2xl relative overflow-hidden">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            {/* ⭐ FOYDALANUVCHI RASMLARI: BEFORE, IN-TRADE, AFTER TRADE (UZUN VA CHIROYLI) ⭐ */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-1 border-b border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
                     <ImageIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <span>Sdelka Grafiki / Skrinshot Havolasi</span>
-                      {linkSavedToast && (
-                        <span className="text-[10px] bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full font-bold animate-pulse">
-                          Saqlandi!
-                        </span>
-                      )}
-                    </h4>
-                    <p className="text-[11px] text-slate-400">TradingView yoki rasm havolasini qo‘yish</p>
+                    <h4 className="text-sm font-bold text-white">Sdelka Skrinshotlari & Grafiklar</h4>
+                    <p className="text-[11px] text-slate-400">Before Trade, In Trade va After Trade tahlillari</p>
                   </div>
                 </div>
-
-                {!isEditingLink && (
-                  <button
-                    onClick={() => setIsEditingLink(true)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{trade.chart_url ? 'O‘zgartirish' : 'Link qo‘yish'}</span>
-                  </button>
+                {linkSavedToast && (
+                  <span className="text-[10px] bg-emerald-500 text-slate-950 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+                    Saqlandi!
+                  </span>
                 )}
               </div>
 
-              {/* Editing URL Input */}
-              {isEditingLink ? (
-                <div className="mt-4 space-y-3 bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-                  <label className="text-xs font-medium text-slate-300 block">
-                    Grafik havolasini kiriting (TradingView, FxReplay yoki rasm):
-                  </label>
+              {/* STAGE 1: BEFORE TRADE */}
+              <div className="rounded-3xl border-2 border-cyan-500/30 bg-[#090e1a] p-4 sm:p-5 shadow-xl space-y-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://www.tradingview.com/x/... yoki https://fxreplay.com/..."
-                      value={chartLinkInput}
-                      onChange={(e) => setChartLinkInput(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
-                    />
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+                    <h5 className="font-bold text-white text-xs tracking-wide uppercase">
+                      1. Before Trade (Kirishdan oldin - Setup)
+                    </h5>
                   </div>
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    {trade.chart_url && (
-                      <button
-                        onClick={handleClearLink}
-                        className="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs"
-                      >
-                        O‘chirish
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setIsEditingLink(false)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"
-                    >
-                      Bekor qilish
-                    </button>
-                    <button
-                      onClick={handleSaveLink}
-                      className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1"
-                    >
-                      <Check className="w-3.5 h-3.5" /> Saqlash
-                    </button>
-                  </div>
-                </div>
-              ) : trade.chart_url || trade.before_photo ? (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
-                    <div className="flex items-center gap-2 truncate mr-2">
-                      <LinkIcon className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span className="font-mono text-emerald-400 truncate underline cursor-pointer" onClick={() => window.open(trade.chart_url || trade.before_photo, '_blank')}>
-                        {trade.chart_url || trade.before_photo}
-                      </span>
-                    </div>
-                    <a
-                      href={trade.chart_url || trade.before_photo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold flex items-center gap-1 shrink-0 transition border border-emerald-500/40"
-                    >
-                      <span>Ochish</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-
-                  {/* Inline visual preview for images */}
-                  {(trade.chart_url || trade.before_photo)?.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || 
-                   (trade.chart_url || trade.before_photo)?.includes('ibb.co') ||
-                   (trade.chart_url || trade.before_photo)?.includes('prnt.sc') ? (
-                    <div className="rounded-2xl overflow-hidden border border-slate-800 bg-black/60 relative group">
-                      <img 
-                        src={trade.chart_url || trade.before_photo} 
-                        alt="Trade Chart Preview"
-                        className="w-full max-h-60 object-contain hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="mt-4 p-4 rounded-2xl bg-slate-950/60 border border-dashed border-slate-800 text-center">
-                  <p className="text-xs text-slate-400 mb-2">Hali grafik havolasi kiritilmagan</p>
                   <button
-                    onClick={() => setIsEditingLink(true)}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs font-semibold inline-flex items-center gap-1.5 transition border border-emerald-500/30"
+                    onClick={() => {
+                      setEditingPhotoStage('before');
+                      setPhotoInputUrl(trade.before_photo || trade.chart_url || '');
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-300 text-[11px] font-semibold border border-cyan-500/30 transition"
                   >
-                    <LinkIcon className="w-3.5 h-3.5" /> Havola qo‘shish
+                    <Edit3 className="w-3 h-3" />
+                    <span>{(trade.before_photo || trade.chart_url) ? 'O‘zgartirish' : 'Rasm qo‘yish'}</span>
                   </button>
                 </div>
-              )}
+
+                {editingPhotoStage === 'before' ? (
+                  <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <label className="text-[11px] text-slate-300 block">Before Trade skrinshot havolasi (URL):</label>
+                    <input
+                      type="url"
+                      placeholder="https://www.tradingview.com/x/... yoki rasm linki"
+                      value={photoInputUrl}
+                      onChange={(e) => setPhotoInputUrl(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-cyan-400"
+                    />
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        onClick={() => setEditingPhotoStage(null)}
+                        className="px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs"
+                      >
+                        Bekor qilish
+                      </button>
+                      <button
+                        onClick={() => handleSavePhotoUrl('before_photo', photoInputUrl)}
+                        className="px-3 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Saqlash
+                      </button>
+                    </div>
+                  </div>
+                ) : (trade.before_photo || trade.chart_url) ? (
+                  <div className="space-y-2">
+                    <div className="rounded-2xl overflow-hidden border border-slate-800 bg-black/60 relative group">
+                      <img
+                        src={trade.before_photo || trade.chart_url}
+                        alt="Before Trade Chart"
+                        className="w-full max-h-72 object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in"
+                        onClick={() => window.open(trade.before_photo || trade.chart_url, '_blank')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                      <span className="truncate max-w-[280px] font-mono text-cyan-400">
+                        {trade.before_photo || trade.chart_url}
+                      </span>
+                      <a
+                        href={trade.before_photo || trade.chart_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        <span>Kattalashtirish</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 p-4">
+                    {/* TradingView-style dark SVG representation of Before trade */}
+                    <div className="h-44 w-full relative flex flex-col justify-between select-none">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                        <span>{trade.instrument} • 1M Chart</span>
+                        <span className="text-cyan-400 font-bold">Liquidity Sweep & FVG Setup</span>
+                      </div>
+                      {/* Candlestick illustration */}
+                      <svg viewBox="0 0 400 120" className="w-full h-28 my-auto">
+                        {/* Support / Liquidity line */}
+                        <line x1="10" y1="90" x2="390" y2="90" stroke="#06b6d4" strokeDasharray="4 4" strokeWidth="1.5" />
+                        <text x="15" y="82" fill="#06b6d4" fontSize="10" fontFamily="monospace">Asia / London Low Sweep</text>
+                        {/* Candlesticks */}
+                        <line x1="50" y1="20" x2="50" y2="80" stroke="#64748b" strokeWidth="1.5" />
+                        <rect x="44" y="35" width="12" height="35" fill="#ef4444" rx="2" />
+                        <line x1="110" y1="30" x2="110" y2="95" stroke="#ef4444" strokeWidth="1.5" />
+                        <rect x="104" y="45" width="12" height="40" fill="#ef4444" rx="2" />
+                        <line x1="170" y1="40" x2="170" y2="105" stroke="#06b6d4" strokeWidth="2" />
+                        <rect x="164" y="60" width="12" height="38" fill="#ef4444" rx="2" />
+                        {/* FVG box */}
+                        <rect x="210" y="30" width="60" height="40" fill="#06b6d4" fillOpacity="0.15" stroke="#06b6d4" strokeWidth="1" strokeDasharray="2 2" rx="4" />
+                        <text x="220" y="55" fill="#06b6d4" fontSize="10" fontFamily="monospace">iFVG Zone</text>
+                        {/* Confirmation candle */}
+                        <line x1="240" y1="15" x2="240" y2="85" stroke="#10b981" strokeWidth="2" />
+                        <rect x="234" y="25" width="12" height="45" fill="#10b981" rx="2" />
+                        <line x1="300" y1="10" x2="300" y2="70" stroke="#10b981" strokeWidth="2" />
+                        <rect x="294" y="15" width="12" height="45" fill="#10b981" rx="2" />
+                      </svg>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Setup: {trade.direction === 'Long' ? 'Bullish Reversal' : 'Bearish Reversal'}</span>
+                        <button
+                          onClick={() => {
+                            setEditingPhotoStage('before');
+                            setPhotoInputUrl('');
+                          }}
+                          className="text-cyan-400 hover:text-cyan-300 font-bold"
+                        >
+                          + O‘z skrinshotingizni yuklang
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* STAGE 2: IN TRADE */}
+              <div className="rounded-3xl border-2 border-amber-500/30 bg-[#090e1a] p-4 sm:p-5 shadow-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                    <h5 className="font-bold text-white text-xs tracking-wide uppercase">
+                      2. In Trade (Pozitsiyada - Jarayon)
+                    </h5>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setEditingPhotoStage('inTrade');
+                      setPhotoInputUrl(trade.in_trade_photo || '');
+                    }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-300 text-[11px] font-semibold border border-amber-500/30 transition"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>{trade.in_trade_photo ? 'O‘zgartirish' : 'Rasm qo‘yish'}</span>
+                  </button>
+                </div>
+
+                {editingPhotoStage === 'inTrade' ? (
+                  <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <label className="text-[11px] text-slate-300 block">In-Trade skrinshot havolasi (URL):</label>
+                    <input
+                      type="url"
+                      placeholder="https://www.tradingview.com/x/... yoki rasm linki"
+                      value={photoInputUrl}
+                      onChange={(e) => setPhotoInputUrl(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-amber-400"
+                    />
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        onClick={() => setEditingPhotoStage(null)}
+                        className="px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs"
+                      >
+                        Bekor qilish
+                      </button>
+                      <button
+                        onClick={() => handleSavePhotoUrl('in_trade_photo', photoInputUrl)}
+                        className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Saqlash
+                      </button>
+                    </div>
+                  </div>
+                ) : trade.in_trade_photo ? (
+                  <div className="space-y-2">
+                    <div className="rounded-2xl overflow-hidden border border-slate-800 bg-black/60 relative group">
+                      <img
+                        src={trade.in_trade_photo}
+                        alt="In Trade Chart"
+                        className="w-full max-h-72 object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in"
+                        onClick={() => window.open(trade.in_trade_photo, '_blank')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                      <span className="truncate max-w-[280px] font-mono text-amber-400">
+                        {trade.in_trade_photo}
+                      </span>
+                      <a
+                        href={trade.in_trade_photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-amber-400 hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        <span>Kattalashtirish</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 p-4">
+                    <div className="h-44 w-full relative flex flex-col justify-between select-none">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                        <span>Pozitsiya: <strong className="text-white">{trade.direction}</strong></span>
+                        <span className="text-amber-400 font-bold">Entry & Trailing Risk</span>
+                      </div>
+                      <svg viewBox="0 0 400 120" className="w-full h-28 my-auto">
+                        {/* Entry line */}
+                        <line x1="10" y1="65" x2="390" y2="65" stroke="#10b981" strokeWidth="1.5" />
+                        <text x="15" y="58" fill="#10b981" fontSize="10" fontFamily="monospace">KIRISH (Entry Price)</text>
+                        {/* Stop Loss line */}
+                        <line x1="10" y1="95" x2="390" y2="95" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="3 3" />
+                        <text x="15" y="110" fill="#ef4444" fontSize="10" fontFamily="monospace">Stop Loss (Risk 0.2%)</text>
+                        {/* Target line */}
+                        <line x1="10" y1="20" x2="390" y2="20" stroke="#10b981" strokeWidth="1.5" strokeDasharray="3 3" />
+                        <text x="15" y="15" fill="#10b981" fontSize="10" fontFamily="monospace">Take Profit Target</text>
+                        {/* In-trade candles */}
+                        <line x1="180" y1="45" x2="180" y2="85" stroke="#10b981" strokeWidth="2" />
+                        <rect x="174" y="50" width="12" height="30" fill="#10b981" rx="2" />
+                        <line x1="240" y1="35" x2="240" y2="70" stroke="#10b981" strokeWidth="2" />
+                        <rect x="234" y="40" width="12" height="25" fill="#10b981" rx="2" />
+                        <line x1="300" y1="20" x2="300" y2="55" stroke="#10b981" strokeWidth="2" />
+                        <rect x="294" y="25" width="12" height="25" fill="#10b981" rx="2" />
+                      </svg>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>R:R Nisbat: <strong className="text-white">{trade.rr_ratio || '1:2.1'}</strong></span>
+                        <button
+                          onClick={() => {
+                            setEditingPhotoStage('inTrade');
+                            setPhotoInputUrl('');
+                          }}
+                          className="text-amber-400 hover:text-amber-300 font-bold"
+                        >
+                          + O‘z skrinshotingizni yuklang
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* STAGE 3: AFTER TRADE */}
+              <div className={`rounded-3xl border-2 ${isProfit ? 'border-emerald-500/40' : 'border-rose-500/40'} bg-[#090e1a] p-4 sm:p-5 shadow-xl space-y-3`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${isProfit ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                    <h5 className="font-bold text-white text-xs tracking-wide uppercase">
+                      3. After Trade (Natija - Chiqish tahlili)
+                    </h5>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setEditingPhotoStage('after');
+                      setPhotoInputUrl(trade.after_photo || '');
+                    }}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 ${isProfit ? 'text-emerald-300 border-emerald-500/30' : 'text-rose-300 border-rose-500/30'} text-[11px] font-semibold border transition`}
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>{trade.after_photo ? 'O‘zgartirish' : 'Rasm qo‘yish'}</span>
+                  </button>
+                </div>
+
+                {editingPhotoStage === 'after' ? (
+                  <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <label className="text-[11px] text-slate-300 block">After Trade skrinshot havolasi (URL):</label>
+                    <input
+                      type="url"
+                      placeholder="https://www.tradingview.com/x/... yoki rasm linki"
+                      value={photoInputUrl}
+                      onChange={(e) => setPhotoInputUrl(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-400"
+                    />
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        onClick={() => setEditingPhotoStage(null)}
+                        className="px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs"
+                      >
+                        Bekor qilish
+                      </button>
+                      <button
+                        onClick={() => handleSavePhotoUrl('after_photo', photoInputUrl)}
+                        className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1"
+                      >
+                        <Check className="w-3 h-3" /> Saqlash
+                      </button>
+                    </div>
+                  </div>
+                ) : trade.after_photo ? (
+                  <div className="space-y-2">
+                    <div className="rounded-2xl overflow-hidden border border-slate-800 bg-black/60 relative group">
+                      <img
+                        src={trade.after_photo}
+                        alt="After Trade Chart"
+                        className="w-full max-h-72 object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in"
+                        onClick={() => window.open(trade.after_photo, '_blank')}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                      <span className={`truncate max-w-[280px] font-mono ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {trade.after_photo}
+                      </span>
+                      <a
+                        href={trade.after_photo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${isProfit ? 'text-emerald-400' : 'text-rose-400'} hover:underline flex items-center gap-1 font-semibold`}
+                      >
+                        <span>Kattalashtirish</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-950 p-4">
+                    <div className="h-44 w-full relative flex flex-col justify-between select-none">
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                        <span>Yakuniy Sof P&L:</span>
+                        <span className={`font-black text-xs ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {isProfit ? '+' : ''}${trade.net_pnl.toFixed(2)}
+                        </span>
+                      </div>
+                      <svg viewBox="0 0 400 120" className="w-full h-28 my-auto">
+                        <line x1="10" y1="20" x2="390" y2="20" stroke="#10b981" strokeWidth="2" strokeDasharray="4 4" />
+                        <text x="15" y="15" fill="#10b981" fontSize="10" fontFamily="monospace">Take Profit TARGET HIT ✓</text>
+                        <line x1="260" y1="15" x2="260" y2="60" stroke="#10b981" strokeWidth="2.5" />
+                        <rect x="252" y="20" width="16" height="35" fill="#10b981" rx="2" />
+                        {/* Target badge */}
+                        <circle cx="260" cy="20" r="6" fill="#10b981" />
+                        <text x="275" y="24" fill="#10b981" fontSize="11" fontWeight="bold" fontFamily="monospace">
+                          +{trade.rr_ratio || '2.1'}R Target
+                        </text>
+                      </svg>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Davomiyligi: <strong className="text-white">{trade.duration || '12m'}</strong></span>
+                        <button
+                          onClick={() => {
+                            setEditingPhotoStage('after');
+                            setPhotoInputUrl('');
+                          }}
+                          className={`${isProfit ? 'text-emerald-400 hover:text-emerald-300' : 'text-rose-400 hover:text-rose-300'} font-bold`}
+                        >
+                          + O‘z skrinshotingizni yuklang
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Strategy Checkmarks Summary (Galochkalar) */}

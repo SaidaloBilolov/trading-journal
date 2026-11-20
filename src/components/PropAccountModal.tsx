@@ -51,8 +51,10 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
   allTrades,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [marketType, setMarketType] = useState<'futures' | 'forex' | 'backtest'>('futures');
+  const [drawdownType, setDrawdownType] = useState<'trailing' | 'static'>('trailing');
   const [name, setName] = useState('');
-  const [firm, setFirm] = useState('Apex Trader Funding');
+  const [firm, setFirm] = useState('Tradify');
   const [initialBalance, setInitialBalance] = useState<number>(50000);
   const [trailingDrawdown, setTrailingDrawdown] = useState<number>(2000);
   const [dailyLossLimit, setDailyLossLimit] = useState<number>(1000);
@@ -60,6 +62,45 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
   const [description, setDescription] = useState('');
 
   if (!isOpen) return null;
+
+  const handleOpenAddFutures = () => {
+    setMarketType('futures');
+    setDrawdownType('trailing');
+    setName('Apex 50K');
+    setFirm('Apex Trader Funding');
+    setInitialBalance(50000);
+    setTrailingDrawdown(2000);
+    setDailyLossLimit(1000);
+    setMaxContracts(5);
+    setDescription('Futures prop hisobi (Trailing Drawdown ko‘tariladi)');
+    setShowAddForm(true);
+  };
+
+  const handleOpenAddForex = () => {
+    setMarketType('forex');
+    setDrawdownType('static');
+    setName('FTMO 50K (FX)');
+    setFirm('FTMO');
+    setInitialBalance(50000);
+    setTrailingDrawdown(5000); // 10% static DD
+    setDailyLossLimit(2500); // 5% daily loss
+    setMaxContracts(10);
+    setDescription('Forex / FX prop hisobi (Statik Drawdown ko‘tarilmaydi, qat’iy $45 000 da turadi)');
+    setShowAddForm(true);
+  };
+
+  const handleOpenAddBacktest = () => {
+    setMarketType('backtest');
+    setDrawdownType('trailing');
+    setName('Backtest (FxReplay)');
+    setFirm('Backtest');
+    setInitialBalance(50000);
+    setTrailingDrawdown(2000);
+    setDailyLossLimit(1000);
+    setMaxContracts(5);
+    setDescription('FxReplay / TradingView tarixiy sinov Notion jurnali');
+    setShowAddForm(true);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,8 +110,10 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
       id: `acc-${Date.now()}`,
       name: name.trim(),
       firm: firm.trim(),
+      market_type: marketType,
+      drawdown_type: drawdownType,
       initial_balance: Number(initialBalance) || 50000,
-      trailing_drawdown_amount: Number(trailingDrawdown) || 2000,
+      trailing_drawdown_amount: Number(trailingDrawdown) || (drawdownType === 'static' ? 5000 : 2000),
       daily_loss_limit: Number(dailyLossLimit) || 1000,
       max_contracts: Number(maxContracts) || 5,
       created_at: new Date().toISOString(),
@@ -127,33 +170,30 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setName('Backtest (FxReplay)');
-                      setFirm('Backtest');
-                      setInitialBalance(50000);
-                      setTrailingDrawdown(2000);
-                      setDescription('FxReplay / TradingView tarixiy sinov Notion jurnali');
-                      setShowAddForm(true);
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 border border-purple-500/50 text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                    onClick={handleOpenAddFutures}
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-cyan-500/20"
+                    title="Futures prop hisobi qo‘shish (Trailing Drawdown)"
                   >
-                    <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
-                    <span>+ Yangi Backtest</span>
+                    <span>⚡ + Futures Prop (Trailing DD)</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setName('');
-                      setFirm('Apex Trader Funding');
-                      setInitialBalance(50000);
-                      setTrailingDrawdown(2000);
-                      setDescription('');
-                      setShowAddForm(true);
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-cyan-500/20"
+                    onClick={handleOpenAddForex}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-emerald-500/20"
+                    title="Forex prop hisobi qo‘shish (Statik Drawdown)"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Yangi Prop Hisob
+                    <span>🌐 + FX Prop (Statik DD)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddBacktest}
+                    className="px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 border border-purple-500/50 text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                    title="Yangi Backtest Notion jurnali ochish"
+                  >
+                    <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
+                    <span>+ Yangi Backtest</span>
                   </button>
                 </div>
               )}
@@ -197,11 +237,18 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                         <span className="text-[11px] px-2 py-0.5 rounded-lg bg-purple-950 text-purple-300 border border-purple-700/60 font-mono font-bold flex items-center gap-1">
                           <FlaskConical className="w-3 h-3 text-purple-400" /> Backtest Notion Jurnali
                         </span>
+                      ) : acc.drawdown_type === 'static' ? (
+                        <span className="text-[11px] px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-mono font-bold flex items-center gap-1">
+                          <span>🌐 FX Prop (Statik DD)</span>
+                        </span>
                       ) : (
-                        <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-medium">
-                          {acc.firm}
+                        <span className="text-[11px] px-2 py-0.5 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-mono font-bold flex items-center gap-1">
+                          <span>⚡ Futures (Trailing DD)</span>
                         </span>
                       )}
+                      <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-medium">
+                        {acc.firm}
+                      </span>
                     </div>
 
                     <h3 className="font-bold text-white text-base truncate">{acc.name}</h3>
@@ -223,7 +270,15 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
 
                     <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-1">
                       <span>{accTrades.length} ta sdelka ({accWinRate}% WR)</span>
-                      <span className="text-rose-400/90 font-mono">Max DD: -${acc.trailing_drawdown_amount}</span>
+                      {acc.drawdown_type === 'static' ? (
+                        <span className="text-emerald-400 font-mono font-semibold" title="Statik: Sliv chegarasi ko‘tarilmaydi">
+                          Statik DD: -${acc.trailing_drawdown_amount} (qat’iy)
+                        </span>
+                      ) : (
+                        <span className="text-rose-400 font-mono" title="Trailing: Balans bilan birga ko‘tariladi">
+                          Trailing DD: -${acc.trailing_drawdown_amount} (ko‘tariladi)
+                        </span>
+                      )}
                     </div>
 
                     {/* Delete action: Only Backtest accounts can be deleted, NOT real prop accounts! */}
@@ -271,6 +326,59 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* 1. Bozor turi va Drawdown qoidasi tanlash (Futures vs Forex) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-900 border border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMarketType('futures');
+                      setDrawdownType('trailing');
+                      setTrailingDrawdown(2000);
+                      if (firm === 'FTMO') setFirm('Tradify');
+                    }}
+                    className={`p-3 rounded-xl border text-left transition ${
+                      marketType === 'futures'
+                        ? 'bg-cyan-500/15 border-cyan-500 text-white shadow-lg shadow-cyan-500/10'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-bold text-xs text-cyan-400 mb-1">
+                      <span>⚡ Futures Prop</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono">
+                        Trailing DD (Ko‘tariladi)
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-snug">
+                      Hisob foydasi oshgan sari sliv chegarasi ham pikdan 2K pastda ko‘tarilib boradi (Tradify, Apex, Topstep).
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMarketType('forex');
+                      setDrawdownType('static');
+                      setTrailingDrawdown(5000);
+                      if (firm === 'Apex Trader Funding' || firm === 'Tradify') setFirm('FTMO');
+                    }}
+                    className={`p-3 rounded-xl border text-left transition ${
+                      marketType === 'forex'
+                        ? 'bg-emerald-500/15 border-emerald-500 text-white shadow-lg shadow-emerald-500/10'
+                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-bold text-xs text-emerald-400 mb-1">
+                      <span>🌐 Forex / FX Prop</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-mono">
+                        Statik DD (Ko‘tarilmaydi)
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-snug">
+                      Drawdown ko‘tarilmaydi! Boshlang‘ich balansdan (masalan $50k dan 5K = $45 000) qat’iy turadi (FTMO, FundedNext).
+                    </p>
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   
                   {/* Hisob nomi */}
@@ -281,7 +389,7 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                     <input
                       type="text"
                       required
-                      placeholder="masalan: Apex 50K PA yoki Topstep #2"
+                      placeholder={drawdownType === 'static' ? 'masalan: FTMO 50K FX' : 'masalan: Apex 50K PA yoki Tradify'}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"
@@ -311,7 +419,7 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                       <span className="text-slate-400 text-[11px] font-mono">${initialBalance.toLocaleString()}</span>
                     </label>
                     <div className="flex gap-1.5 mb-2">
-                      {[25000, 50000, 100000, 150000].map((amt) => (
+                      {[25000, 50000, 100000, 200000].map((amt) => (
                         <button
                           key={amt}
                           type="button"
@@ -335,23 +443,30 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                     />
                   </div>
 
-                  {/* Trailing Drawdown ($) */}
+                  {/* Drawdown ($) (Static or Trailing) */}
                   <div>
                     <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center justify-between">
                       <span className="flex items-center gap-1">
-                        <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> Trailing Drawdown ($)
+                        <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                        <span>{drawdownType === 'static' ? 'Statik Drawdown ($)' : 'Trailing Drawdown ($)'}</span>
                       </span>
-                      <span className="text-rose-400 text-[11px] font-mono">Pikdan -${trailingDrawdown}</span>
+                      <span className={`text-[11px] font-mono ${drawdownType === 'static' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {drawdownType === 'static' 
+                          ? `Sliv: $${(initialBalance - trailingDrawdown).toLocaleString()} (ko‘tarilmaydi)` 
+                          : `Pikdan -$${trailingDrawdown} (ko‘tariladi)`}
+                      </span>
                     </label>
                     <div className="flex gap-1.5 mb-2">
-                      {[1500, 2000, 2500, 3000].map((amt) => (
+                      {(drawdownType === 'static' ? [2500, 5000, 10000, 20000] : [1500, 2000, 2500, 3000]).map((amt) => (
                         <button
                           key={amt}
                           type="button"
                           onClick={() => setTrailingDrawdown(amt)}
                           className={`flex-1 py-1 text-[11px] font-mono rounded-lg border transition ${
                             trailingDrawdown === amt
-                              ? 'bg-rose-500/20 border-rose-500 text-rose-300 font-bold'
+                              ? drawdownType === 'static'
+                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                                : 'bg-rose-500/20 border-rose-500 text-rose-300 font-bold'
                               : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
                           }`}
                         >
@@ -364,7 +479,9 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                       required
                       value={trailingDrawdown}
                       onChange={(e) => setTrailingDrawdown(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-rose-500"
+                      className={`w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none ${
+                        drawdownType === 'static' ? 'focus:border-emerald-500' : 'focus:border-rose-500'
+                      }`}
                     />
                   </div>
 

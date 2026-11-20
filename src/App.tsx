@@ -380,6 +380,7 @@ export function App() {
             initialBalance={activeInitialBalance}
             trailingDrawdown={activeAccount.trailing_drawdown_amount}
             accountName={activeAccount.name}
+            drawdownType={activeAccount.drawdown_type}
           />
         )}
 

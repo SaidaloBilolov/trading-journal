@@ -72,9 +72,11 @@ export interface Trade {
 export interface PropAccount {
   id: string;
   name: string;
-  firm: string; // Tradify, Apex, Topstep, FundedNext, MyFundedFutures, Shaxsiy, Boshqa
+  firm: string; // Tradify, Apex, Topstep, FTMO, FundedNext, MyFundedFutures, Shaxsiy, Boshqa
+  market_type?: 'futures' | 'forex' | 'backtest';
+  drawdown_type?: 'trailing' | 'static'; // 'trailing': Futures (ko'tariladi), 'static': Forex / FX (ko'tarilmaydi)
   initial_balance: number; // masalan: 50000
-  trailing_drawdown_amount: number; // masalan: 2000 (pikdan 2k pastda)
+  trailing_drawdown_amount: number; // masalan: 2000 (Futures) yoki 5000 (FX 10%)
   daily_loss_limit: number; // masalan: 1000
   max_contracts: number; // masalan: 5
   created_at: string;

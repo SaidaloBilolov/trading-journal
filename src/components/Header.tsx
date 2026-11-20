@@ -52,12 +52,17 @@ export const Header: React.FC<HeaderProps> = ({
   onExportExcel,
   onExportPDF,
 }) => {
-  const trailingDrawdownAmount = activeAccount?.trailing_drawdown_amount || 2000;
+  const isStaticDD = activeAccount?.drawdown_type === 'static';
+  const drawdownAmount = activeAccount?.trailing_drawdown_amount || (isStaticDD ? 5000 : 2000);
   const initialBalance = activeAccount?.initial_balance || settings.initial_balance || 50000;
   const effectivePeak = peakBalance || Math.max(initialBalance, currentBalance);
-  const trailingDrawdownLimit = effectivePeak - trailingDrawdownAmount;
-  const remainingBuffer = Math.max(0, currentBalance - trailingDrawdownLimit);
-  const bufferPercent = Math.min(100, (remainingBuffer / trailingDrawdownAmount) * 100);
+  // Statik (Forex) bo'lsa sliv ko'tarilmaydi, initialBalance - drawdownAmount da qat'iy turadi.
+  // Trailing (Futures) bo'lsa pik bilan birga ko'tariladi.
+  const drawdownLimit = isStaticDD 
+    ? (initialBalance - drawdownAmount) 
+    : (effectivePeak - drawdownAmount);
+  const remainingBuffer = Math.max(0, currentBalance - drawdownLimit);
+  const bufferPercent = Math.min(100, (remainingBuffer / drawdownAmount) * 100);
 
   // Buffer warning level
   const isBufferCritical = remainingBuffer <= 300;
@@ -158,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
                   Qolgan Bufer
                 </span>
                 <span className="font-mono text-slate-500">
-                  Sliv: ${trailingDrawdownLimit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  Sliv: ${drawdownLimit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {isStaticDD ? '(Statik)' : ''}
                 </span>
               </div>
               <div className="flex items-baseline space-x-1">
