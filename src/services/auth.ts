@@ -8,7 +8,7 @@ export const DEFAULT_USERS: AppUser[] = [
     id: 'said',
     username: 'said',
     name: "Saida'lo (Said)",
-    password: 'said', // accepts 'said', 'said2026', '1234'
+    password: 'said2006Bb#',
     role: 'admin',
     avatar: 'SB',
     default_account_id: 'acc-tradify',
@@ -18,7 +18,7 @@ export const DEFAULT_USERS: AppUser[] = [
     id: 'shaxzod',
     username: 'shaxzod',
     name: 'Shaxzod',
-    password: 'shaxzod', // accepts 'shaxzod', 'shaxzod2026', '1234'
+    password: 'shaxzod2026',
     role: 'trader',
     avatar: 'SH',
     default_account_id: 'acc-shaxzod-prop',
@@ -33,11 +33,24 @@ export const getStoredUsers = (): AppUser[] => {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
       return DEFAULT_USERS;
     }
-    const parsed = JSON.parse(raw);
+    const parsed: AppUser[] = JSON.parse(raw);
     if (!Array.isArray(parsed) || parsed.length === 0) {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
       return DEFAULT_USERS;
     }
+
+    // Saida'lo uchun maxfiy parolni yangilash
+    let updated = false;
+    parsed.forEach((u) => {
+      if (u.username === 'said' && u.password !== 'said2006Bb#') {
+        u.password = 'said2006Bb#';
+        updated = true;
+      }
+    });
+    if (updated) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(parsed));
+    }
+
     return parsed;
   } catch (e) {
     console.error('Foydalanuvchilarni o‘qishda xatolik:', e);
@@ -99,14 +112,18 @@ export const loginUser = (
   }
 
   // Faqat shu foydalanuvchining o'z shaxsiy maxfiy paroli tekshiriladi.
-  // Shaxzod Saidaloning hisobiga kirolmaydi, Said ham Shaxzodnikiga kirolmaydi.
-  const userAllowedPasswords = [
-    matchedUser.password,
-    `${matchedUser.username}2026`,
-    matchedUser.username,
-  ].filter(Boolean);
+  // Saida'lo (Said) uchun faqat: 'said2006Bb#'
+  // Shaxzod uchun: 'shaxzod2026'
+  let isValid = false;
+  if (cleanUsername === 'said') {
+    isValid = cleanPassword === 'said2006Bb#';
+  } else if (cleanUsername === 'shaxzod') {
+    isValid = cleanPassword === 'shaxzod2026' || cleanPassword === matchedUser.password;
+  } else {
+    isValid = cleanPassword === matchedUser.password;
+  }
 
-  if (!userAllowedPasswords.includes(cleanPassword)) {
+  if (!isValid) {
     return { success: false, message: 'Parol noto‘g‘ri kiritildi' };
   }
 
