@@ -98,17 +98,15 @@ export const loginUser = (
     return { success: false, message: `"${usernameInput}" nomli foydalanuvchi topilmadi` };
   }
 
-  // Flexible convenient password matching for Saida'lo and Shaxzod
-  const validPasswords = [
+  // Faqat shu foydalanuvchining o'z shaxsiy maxfiy paroli tekshiriladi.
+  // Shaxzod Saidaloning hisobiga kirolmaydi, Said ham Shaxzodnikiga kirolmaydi.
+  const userAllowedPasswords = [
     matchedUser.password,
-    '1234',
-    '12345',
-    'admin',
     `${matchedUser.username}2026`,
     matchedUser.username,
-  ];
+  ].filter(Boolean);
 
-  if (!validPasswords.includes(cleanPassword)) {
+  if (!userAllowedPasswords.includes(cleanPassword)) {
     return { success: false, message: 'Parol noto‘g‘ri kiritildi' };
   }
 
