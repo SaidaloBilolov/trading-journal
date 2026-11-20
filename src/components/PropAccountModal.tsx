@@ -226,19 +226,27 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                       <span className="text-rose-400/90 font-mono">Max DD: -${acc.trailing_drawdown_amount}</span>
                     </div>
 
-                    {accounts.length > 1 && !isActive && (
+                    {/* Delete action: Only Backtest accounts can be deleted, NOT real prop accounts! */}
+                    {acc.firm === 'Backtest' || acc.id.includes('backtest') || acc.name.toLowerCase().includes('backtest') ? (
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (window.confirm(`"${acc.name}" hisobini o‘chirmoqchimisiz?`)) {
+                          if (window.confirm(`"${acc.name}" backtest jurnali va unga tegishli barcha sdelkalarni o‘chirmoqchimisiz?`)) {
                             onDeleteAccount(acc.id);
                           }
                         }}
-                        className="mt-3 w-full py-1 rounded bg-slate-900 hover:bg-rose-950/50 text-slate-400 hover:text-rose-400 text-xs flex items-center justify-center gap-1 transition border border-slate-800"
+                        className="mt-3 w-full py-1.5 rounded-lg bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 hover:text-rose-100 text-xs font-semibold flex items-center justify-center gap-1.5 transition border border-rose-500/40 shadow-sm"
+                        title="Backtest jurnalini o‘chirish"
                       >
-                        <Trash2 className="w-3 h-3" /> Hisobni o‘chirish
+                        <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Backtestni o‘chirish</span>
                       </button>
+                    ) : (
+                      <div className="mt-3 w-full py-1.5 rounded-lg bg-slate-900/70 text-slate-400 text-[11px] font-mono flex items-center justify-center gap-1.5 border border-slate-800/80">
+                        <ShieldAlert className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Prop Hisob (Himoyalangan)</span>
+                      </div>
                     )}
                   </div>
                 );

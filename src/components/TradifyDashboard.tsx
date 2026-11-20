@@ -21,12 +21,14 @@ interface TradifyDashboardProps {
   trades: Trade[];
   settings: UserSettings;
   onSelectTrade: (trade: Trade) => void;
+  accountName?: string;
 }
 
 export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
   trades,
   settings,
   onSelectTrade,
+  accountName,
 }) => {
   // Calendar month state: Default to November 2026 (matching Tradovate data)
   const [currentYear, setCurrentYear] = useState<number>(2026);
@@ -57,35 +59,88 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
   }, [losses]);
 
   // Profit Factor & Expectancy
-  const sumGrossProfit = wins.reduce((acc, t) => acc + t.gross_pnl, 0);
-  const sumGrossLoss = Math.abs(losses.reduce((acc, t) => acc + t.gross_pnl, 0));
-  const profitFactor = sumGrossLoss > 0 ? (sumGrossProfit / sumGrossLoss).toFixed(2) : '1.26';
+  const sumGrossProfit = wins.reduce((acc, t) => acc + (t.gross_pnl !== undefined ? t.gross_pnl : (t.net_pnl > 0 ? t.net_pnl : 0)), 0);
+  const sumGrossLoss = Math.abs(losses.reduce((acc, t) => acc + (t.gross_pnl !== undefined ? t.gross_pnl : (t.net_pnl < 0 ? t.net_pnl : 0)), 0));
+  
+  const profitFactor = useMemo(() => {
+    if (totalTrades === 0) return '0.00';
+    if (sumGrossLoss === 0) return sumGrossProfit > 0 ? 'MAX' : '0.00';
+    return (sumGrossProfit / sumGrossLoss).toFixed(2);
+  }, [totalTrades, sumGrossLoss, sumGrossProfit]);
+
   const avgWin = wins.length > 0 ? sumGrossProfit / wins.length : 0;
   const avgLoss = losses.length > 0 ? sumGrossLoss / losses.length : 0;
   const avgNetTrade = totalTrades > 0 ? totalNetPnl / totalTrades : 0;
-  const tradeExpectancy = (winRate / 100) * avgWin - ((100 - winRate) / 100) * avgLoss;
+  const tradeExpectancy = totalTrades > 0 
+    ? (winRate / 100) * avgWin - ((100 - winRate) / 100) * avgLoss 
+    : 0;
 
-  // Streaks calculation
-  const { currentDayStreak, isWinStreak, tradeStreak, isTradeWinStreak } = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
+  // Streaks calculation (100% dynamic from current active trades)
+  const { currentDayStreak, isWinStreak, dayWinsCount, dayLossesCount, tradeStreak, isTradeWinStreak } = useMemo(() => {
+    if (trades.length === 0) {
+      return {
+        currentDayStreak: 0,
+        isWinStreak: true,
+        dayWinsCount: 0,
+        dayLossesCount: 0,
+        tradeStreak: 0,
+        isTradeWinStreak: true,
+      };
+    }
+
+    const sorted = [...trades].sort(
+      (a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime()
+    );
+
+    // Trade streak
     let tStreak = 0;
-    let tWin = true;
+    const lastTradeWin = sorted[sorted.length - 1].net_pnl >= 0;
     for (let i = sorted.length - 1; i >= 0; i--) {
       const isW = sorted[i].net_pnl >= 0;
-      if (i === sorted.length - 1) {
-        tWin = isW;
-        tStreak = 1;
-      } else if (isW === tWin) {
+      if (isW === lastTradeWin) {
         tStreak++;
       } else {
         break;
       }
     }
+
+    // Day streak
+    const dayPnlMap = new Map<string, number>();
+    sorted.forEach((t) => {
+      dayPnlMap.set(t.date, (dayPnlMap.get(t.date) || 0) + t.net_pnl);
+    });
+    const dayDates = Array.from(dayPnlMap.keys()).sort();
+    let dStreak = 0;
+    let dWin = true;
+    let totalGreenDays = 0;
+    let totalRedDays = 0;
+
+    dayPnlMap.forEach((pnl) => {
+      if (pnl > 0) totalGreenDays++;
+      else if (pnl < 0) totalRedDays++;
+    });
+
+    if (dayDates.length > 0) {
+      const lastDayPnl = dayPnlMap.get(dayDates[dayDates.length - 1]) || 0;
+      dWin = lastDayPnl >= 0;
+      for (let i = dayDates.length - 1; i >= 0; i--) {
+        const pnl = dayPnlMap.get(dayDates[i]) || 0;
+        const isW = pnl >= 0;
+        if (isW === dWin) {
+          dStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
     return {
-      currentDayStreak: 2,
-      isWinStreak: false,
-      tradeStreak: tStreak || 4,
-      isTradeWinStreak: tWin,
+      currentDayStreak: dStreak,
+      isWinStreak: dWin,
+      dayWinsCount: totalGreenDays,
+      dayLossesCount: totalRedDays,
+      tradeStreak: tStreak,
+      isTradeWinStreak: lastTradeWin,
     };
   }, [trades]);
 
@@ -297,7 +352,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                   fill="none"
                   stroke="#10b981"
                   strokeWidth="3.5"
-                  strokeDasharray="56, 100"
+                  strokeDasharray={`${totalTrades > 0 && sumGrossProfit + sumGrossLoss > 0 ? ((sumGrossProfit / (sumGrossProfit + sumGrossLoss)) * 100).toFixed(0) : '0'}, 100`}
                 />
               </svg>
               <div className="w-2 h-2 rounded-full bg-white shadow" />
@@ -319,14 +374,16 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
 
           <div className="my-2">
             <div className="text-3xl font-black text-white font-mono">
-              ${tradeExpectancy > 0 ? tradeExpectancy.toFixed(2) : '11.19'}
+              ${totalTrades > 0 ? (tradeExpectancy >= 0 ? '+' : '') + tradeExpectancy.toFixed(2) : '0.00'}
             </div>
             <span className="text-[11px] text-slate-500 mt-1 block">Bitta sdelkadan o‘rtacha kutilma</span>
           </div>
 
           <div className="text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between">
             <span>O‘rtacha foyda:</span>
-            <span className="text-emerald-400 font-bold">+${avgNetTrade.toFixed(2)}</span>
+            <span className="text-emerald-400 font-bold">
+              {totalTrades > 0 ? (avgNetTrade >= 0 ? '+' : '-') + '$' + Math.abs(avgNetTrade).toFixed(2) : '$0.00'}
+            </span>
           </div>
         </div>
 
@@ -339,14 +396,14 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
 
           <div className="my-2">
             <div className="text-2xl font-black text-white font-mono">
-              ${(avgWin - avgLoss).toFixed(2)}
+              {totalTrades > 0 ? (avgWin - avgLoss >= 0 ? '+' : '-') + '$' + Math.abs(avgWin - avgLoss).toFixed(2) : '$0.00'}
             </div>
             
             {/* Split Green / Red Bar */}
             <div className="w-full flex gap-1 h-2 rounded-full overflow-hidden mt-2 bg-slate-900">
               <div 
                 className="bg-emerald-500 rounded-l-full" 
-                style={{ width: `${(avgWin / (avgWin + avgLoss || 1)) * 100}%` }}
+                style={{ width: `${totalTrades > 0 ? (avgWin / (avgWin + avgLoss || 1)) * 100 : 50}%` }}
               />
               <div 
                 className="bg-rose-500 rounded-r-full flex-1" 
@@ -355,8 +412,8 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           </div>
 
           <div className="text-[11px] font-mono pt-2 border-t border-slate-800/80 flex items-center justify-between">
-            <span className="text-emerald-400 font-bold">+${avgWin.toFixed(2)}</span>
-            <span className="text-rose-400 font-bold">-${avgLoss.toFixed(2)}</span>
+            <span className="text-emerald-400 font-bold">+{totalTrades > 0 ? '$' + avgWin.toFixed(2) : '$0.00'}</span>
+            <span className="text-rose-400 font-bold">-{totalTrades > 0 ? '$' + avgLoss.toFixed(2) : '$0.00'}</span>
           </div>
         </div>
 
@@ -378,12 +435,13 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           <div className="w-24 h-12">
             <svg viewBox="0 0 100 40" className="w-full h-full">
               <path
-                d="M 0 35 L 20 20 L 40 25 L 60 10 L 80 30 L 100 15"
+                d={totalTrades > 0 ? "M 0 35 L 20 20 L 40 25 L 60 10 L 80 30 L 100 15" : "M 0 20 L 100 20"}
                 fill="none"
-                stroke="#10b981"
+                stroke={totalTrades > 0 ? (totalNetPnl >= 0 ? "#10b981" : "#ef4444") : "#475569"}
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeDasharray={totalTrades === 0 ? "4 4" : "none"}
               />
             </svg>
           </div>
@@ -394,14 +452,16 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           <div>
             <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Day Streak</span>
             <div className="text-2xl font-black text-white font-mono mt-1 flex items-center gap-1.5">
-              <span>{currentDayStreak} days</span>
-              <Flame className="w-5 h-5 text-amber-500 fill-amber-500 animate-bounce" />
+              <span>{currentDayStreak} kun</span>
+              {currentDayStreak > 0 && (
+                <Flame className={`w-5 h-5 ${isWinStreak ? 'text-amber-500 fill-amber-500 animate-bounce' : 'text-rose-500 fill-rose-500'}`} />
+              )}
             </div>
             <span className="text-[11px] text-slate-500 mt-0.5 block">Ketma-ket kunlik seriya</span>
           </div>
           <div className="flex gap-1 text-[10px] font-mono">
-            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">0 W</span>
-            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">2 L</span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">{dayWinsCount} W</span>
+            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">{dayLossesCount} L</span>
           </div>
         </div>
 
@@ -410,14 +470,16 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           <div>
             <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Trade Streak</span>
             <div className="text-2xl font-black text-white font-mono mt-1 flex items-center gap-1.5">
-              <span>{tradeStreak} trades</span>
-              <Flame className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <span>{tradeStreak} ta</span>
+              {tradeStreak > 0 && (
+                <Flame className={`w-5 h-5 ${isTradeWinStreak ? 'text-amber-500 fill-amber-500' : 'text-rose-500 fill-rose-500'}`} />
+              )}
             </div>
             <span className="text-[11px] text-slate-500 mt-0.5 block">Oxirgi sdelkalar seriyasi</span>
           </div>
           <div className="flex gap-1 text-[10px] font-mono">
-            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">2 W</span>
-            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">4 L</span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">{wins.length} W</span>
+            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">{losses.length} L</span>
           </div>
         </div>
 
@@ -428,18 +490,18 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
             <div>
               <span className="text-[10px] text-slate-500 block">Eng Katta Yutuq:</span>
               <span className="text-emerald-400 font-bold text-sm">
-                +${largestWinTrade ? largestWinTrade.net_pnl.toFixed(2) : '524.00'}
+                {largestWinTrade ? `+$${largestWinTrade.net_pnl.toFixed(2)}` : '$0.00'}
               </span>
             </div>
             <div className="text-right">
               <span className="text-[10px] text-slate-500 block">Eng Katta Zarar:</span>
               <span className="text-rose-400 font-bold text-sm">
-                -${largestLossTrade ? Math.abs(largestLossTrade.net_pnl).toFixed(2) : '344.00'}
+                {largestLossTrade ? `-$${Math.abs(largestLossTrade.net_pnl).toFixed(2)}` : '$0.00'}
               </span>
             </div>
           </div>
           <span className="text-[10px] text-slate-500 truncate">
-            {largestWinTrade ? `${largestWinTrade.instrument} • ${largestWinTrade.date}` : 'MNQZ6'}
+            {largestWinTrade ? `${largestWinTrade.instrument} • ${largestWinTrade.date}` : totalTrades > 0 ? 'Sdelkalar mavjud' : 'Sdelkalar kiritilmagan'}
           </span>
         </div>
 
@@ -634,49 +696,61 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                 <span className="text-sm font-bold text-white">Oxirgi Sdelkalar (Trades)</span>
                 <Info className="w-3.5 h-3.5 text-slate-500 cursor-pointer" />
               </div>
-              <span className="text-xs font-mono text-slate-400 px-2.5 py-0.5 rounded-lg bg-slate-900 border border-slate-800">
-                Tradovate
+              <span className="text-xs font-mono text-slate-300 px-2.5 py-0.5 rounded-lg bg-slate-900 border border-slate-800">
+                {accountName || 'Tradovate'}
               </span>
             </div>
 
             {/* List */}
             <div className="divide-y divide-slate-800/60 mt-3 max-h-[360px] overflow-y-auto pr-1">
-              {trades.slice(0, 10).map((t) => {
-                const isGreen = t.net_pnl >= 0;
-
-                return (
-                  <div
-                    key={t.id}
-                    onClick={() => onSelectTrade(t)}
-                    className="py-2.5 flex items-center justify-between hover:bg-slate-900/60 px-2 rounded-xl cursor-pointer transition-colors group"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-white text-xs px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                          {t.instrument}
-                        </span>
-                        <span className={`text-[11px] font-bold ${t.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                          {t.direction}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                        {t.date} • {t.time}
-                      </span>
-                    </div>
-
-                    <div className="text-right">
-                      <div className={`text-xs font-mono font-black ${
-                        isGreen ? 'text-emerald-400' : 'text-rose-400'
-                      }`}>
-                        {isGreen ? '+' : ''}${t.net_pnl.toFixed(2)}
-                      </div>
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        {t.duration || '0m'}
-                      </span>
-                    </div>
+              {trades.length === 0 ? (
+                <div className="text-center py-12 px-4">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-950/50 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto mb-2">
+                    <Sparkles className="w-5 h-5" />
                   </div>
-                );
-              })}
+                  <p className="text-xs font-bold text-white mb-1">Hozircha sdelkalar yo‘q</p>
+                  <p className="text-[11px] text-slate-400">
+                    Ushbu hisob uchun yuqoridagi <strong className="text-emerald-400 font-mono">"+ Sdelka"</strong> tugmasi orqali yangi sdelka kiriting.
+                  </p>
+                </div>
+              ) : (
+                trades.slice(0, 10).map((t) => {
+                  const isGreen = t.net_pnl >= 0;
+
+                  return (
+                    <div
+                      key={t.id}
+                      onClick={() => onSelectTrade(t)}
+                      className="py-2.5 flex items-center justify-between hover:bg-slate-900/60 px-2 rounded-xl cursor-pointer transition-colors group"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-white text-xs px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                            {t.instrument}
+                          </span>
+                          <span className={`text-[11px] font-bold ${t.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {t.direction}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+                          {t.date} • {t.time}
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        <div className={`text-xs font-mono font-black ${
+                          isGreen ? 'text-emerald-400' : 'text-rose-400'
+                        }`}>
+                          {isGreen ? '+' : ''}${t.net_pnl.toFixed(2)}
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-mono">
+                          {t.duration || '0m'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

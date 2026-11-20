@@ -23,6 +23,7 @@ import {
   setLocalPropAccounts,
   getActiveAccountId,
   setActiveAccountId,
+  setLocalTrades,
   resetAllToDemo
 } from './services/storage';
 import { exportTradesToExcel } from './utils/excelExport';
@@ -137,13 +138,19 @@ export function App() {
   };
 
   const handleDeleteAccount = (id: string) => {
+    // Also remove trades belonging to this backtest
+    setTrades((prev) => {
+      const filtered = prev.filter((t) => (t.account_id || 'acc-tradify') !== id);
+      setLocalTrades(filtered);
+      return filtered;
+    });
     const updated = accounts.filter((a) => a.id !== id);
     setAccounts(updated);
     setLocalPropAccounts(updated);
     if (activeAccountId === id) {
       handleSelectAccount(updated[0]?.id || 'acc-tradify');
     }
-    showToast('Prop hisob o‘chirildi');
+    showToast('Backtest hisobi muvaffaqiyatli o‘chirildi');
   };
 
   // Handlers for Trades
@@ -274,6 +281,7 @@ export function App() {
             trades={activeTrades}
             settings={settings}
             onSelectTrade={(t) => setSelectedTradeForDetail(t)}
+            accountName={activeAccount.name}
           />
         )}
 
