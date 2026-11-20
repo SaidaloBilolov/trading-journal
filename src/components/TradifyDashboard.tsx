@@ -274,7 +274,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
         {/* Card 1: Trade Win Rate Semicircular Gauge */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-semibold uppercase tracking-wider text-[11px]">Trade Win</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px] text-slate-400">Trade Win</span>
             <Info className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 cursor-pointer" />
           </div>
 
@@ -307,19 +307,19 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
               />
             </svg>
             <div className="absolute bottom-1 text-center">
-              <span className="text-xl font-black text-white font-mono">{winRate.toFixed(2)}%</span>
+              <span className="text-xl sm:text-2xl font-bold tracking-tight text-white font-mono">{winRate.toFixed(2)}%</span>
             </div>
           </div>
 
           {/* Counters below */}
           <div className="flex items-center justify-center gap-2 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
-            <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 font-bold border border-emerald-500/20">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 font-semibold border border-emerald-500/20">
               {wins.length} W
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-slate-800/60 text-slate-400 font-bold border border-slate-700/40">
+            <span className="px-2.5 py-0.5 rounded-full bg-slate-800/60 text-slate-400 font-semibold border border-slate-700/40">
               {breakevens.length} BE
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-rose-950/60 text-rose-400 font-bold border border-rose-500/20">
+            <span className="px-2.5 py-0.5 rounded-full bg-rose-950/60 text-rose-400 font-semibold border border-rose-500/20">
               {losses.length} L
             </span>
           </div>
@@ -328,14 +328,14 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
         {/* Card 2: Profit Factor with Circular Ring */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-semibold uppercase tracking-wider text-[11px]">Profit Factor</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px] text-slate-400">Profit Factor</span>
             <Info className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 cursor-pointer" />
           </div>
 
           <div className="flex items-center justify-between my-2">
             <div>
-              <div className="text-3xl font-black text-white font-mono">{profitFactor}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">Yutuq/Zarar nisbati</span>
+              <div className="text-3xl font-bold tracking-tight text-white font-mono">{profitFactor}</div>
+              <span className="text-[11px] text-slate-400 font-medium mt-1 block">Yutuq/Zarar nisbati</span>
             </div>
             
             {/* Donut progress ring */}
@@ -360,28 +360,28 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           </div>
 
           <div className="text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between">
-            <span>Foyda: <strong className="text-emerald-400">${sumGrossProfit.toFixed(0)}</strong></span>
-            <span>Zarar: <strong className="text-rose-400">${sumGrossLoss.toFixed(0)}</strong></span>
+            <span>Foyda: <strong className="text-emerald-400 font-semibold">${sumGrossProfit.toFixed(0)}</strong></span>
+            <span>Zarar: <strong className="text-rose-400 font-semibold">${sumGrossLoss.toFixed(0)}</strong></span>
           </div>
         </div>
 
         {/* Card 3: Trade Expectancy */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-semibold uppercase tracking-wider text-[11px]">Trade Expectancy</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px] text-slate-400">Trade Expectancy</span>
             <Info className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 cursor-pointer" />
           </div>
 
           <div className="my-2">
-            <div className="text-3xl font-black text-white font-mono">
+            <div className="text-3xl font-bold tracking-tight text-white font-mono">
               ${totalTrades > 0 ? (tradeExpectancy >= 0 ? '+' : '') + tradeExpectancy.toFixed(2) : '0.00'}
             </div>
-            <span className="text-[11px] text-slate-500 mt-1 block">Bitta sdelkadan o‘rtacha kutilma</span>
+            <span className="text-[11px] text-slate-400 font-medium mt-1 block">Bitta sdelkadan o‘rtacha kutilma</span>
           </div>
 
           <div className="text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800/80 flex items-center justify-between">
             <span>O‘rtacha foyda:</span>
-            <span className="text-emerald-400 font-bold">
+            <span className="text-emerald-400 font-semibold">
               {totalTrades > 0 ? (avgNetTrade >= 0 ? '+' : '-') + '$' + Math.abs(avgNetTrade).toFixed(2) : '$0.00'}
             </span>
           </div>
@@ -390,12 +390,12 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
         {/* Card 4: Avg Win/Loss Trade Split Bar */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-semibold uppercase tracking-wider text-[11px]">Avg Win / Loss Trade</span>
+            <span className="font-semibold uppercase tracking-wider text-[11px] text-slate-400">Avg Win / Loss Trade</span>
             <Info className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 cursor-pointer" />
           </div>
 
           <div className="my-2">
-            <div className="text-2xl font-black text-white font-mono">
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-mono">
               {totalTrades > 0 ? (avgWin - avgLoss >= 0 ? '+' : '-') + '$' + Math.abs(avgWin - avgLoss).toFixed(2) : '$0.00'}
             </div>
             
@@ -412,8 +412,8 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
           </div>
 
           <div className="text-[11px] font-mono pt-2 border-t border-slate-800/80 flex items-center justify-between">
-            <span className="text-emerald-400 font-bold">+{totalTrades > 0 ? '$' + avgWin.toFixed(2) : '$0.00'}</span>
-            <span className="text-rose-400 font-bold">-{totalTrades > 0 ? '$' + avgLoss.toFixed(2) : '$0.00'}</span>
+            <span className="text-emerald-400 font-semibold">+{totalTrades > 0 ? '$' + avgWin.toFixed(2) : '$0.00'}</span>
+            <span className="text-rose-400 font-semibold">-{totalTrades > 0 ? '$' + avgLoss.toFixed(2) : '$0.00'}</span>
           </div>
         </div>
 
@@ -425,11 +425,11 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
         {/* Net P&L with Sparkline */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex items-center justify-between">
           <div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Net P&L</span>
-            <div className="text-2xl font-black text-white font-mono mt-1">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Net P&L</span>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-mono mt-1">
               {totalNetPnl >= 0 ? '+' : ''}${totalNetPnl.toFixed(2)}
             </div>
-            <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">{totalTrades} sdelka jami</span>
+            <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">{totalTrades} sdelka jami</span>
           </div>
           {/* Mini Sparkline SVG */}
           <div className="w-24 h-12">
@@ -450,57 +450,57 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
         {/* Day Streak */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex items-center justify-between">
           <div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Day Streak</span>
-            <div className="text-2xl font-black text-white font-mono mt-1 flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Day Streak</span>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-mono mt-1 flex items-center gap-1.5">
               <span>{currentDayStreak} kun</span>
               {currentDayStreak > 0 && (
                 <Flame className={`w-5 h-5 ${isWinStreak ? 'text-amber-500 fill-amber-500 animate-bounce' : 'text-rose-500 fill-rose-500'}`} />
               )}
             </div>
-            <span className="text-[11px] text-slate-500 mt-0.5 block">Ketma-ket kunlik seriya</span>
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Ketma-ket kunlik seriya</span>
           </div>
           <div className="flex gap-1 text-[10px] font-mono">
-            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">{dayWinsCount} W</span>
-            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">{dayLossesCount} L</span>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-950/60 text-emerald-400 font-semibold border border-emerald-500/20">{dayWinsCount} W</span>
+            <span className="px-2 py-0.5 rounded-md bg-rose-950/60 text-rose-400 font-semibold border border-rose-500/20">{dayLossesCount} L</span>
           </div>
         </div>
 
         {/* Trade Streak */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex items-center justify-between">
           <div>
-            <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Trade Streak</span>
-            <div className="text-2xl font-black text-white font-mono mt-1 flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Trade Streak</span>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-mono mt-1 flex items-center gap-1.5">
               <span>{tradeStreak} ta</span>
               {tradeStreak > 0 && (
                 <Flame className={`w-5 h-5 ${isTradeWinStreak ? 'text-amber-500 fill-amber-500' : 'text-rose-500 fill-rose-500'}`} />
               )}
             </div>
-            <span className="text-[11px] text-slate-500 mt-0.5 block">Oxirgi sdelkalar seriyasi</span>
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Oxirgi sdelkalar seriyasi</span>
           </div>
           <div className="flex gap-1 text-[10px] font-mono">
-            <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/20">{wins.length} W</span>
-            <span className="px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-400 border border-rose-500/20">{losses.length} L</span>
+            <span className="px-2 py-0.5 rounded-md bg-emerald-950/60 text-emerald-400 font-semibold border border-emerald-500/20">{wins.length} W</span>
+            <span className="px-2 py-0.5 rounded-md bg-rose-950/60 text-rose-400 font-semibold border border-rose-500/20">{losses.length} L</span>
           </div>
         </div>
 
         {/* Eng Katta Yutuq / Zarar (User requested) */}
         <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 shadow-2xl flex flex-col justify-between">
-          <span className="text-xs text-slate-400 uppercase tracking-wider text-[11px] block">Pik Natijalar</span>
+          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Pik Natijalar</span>
           <div className="flex items-center justify-between text-xs font-mono my-1">
             <div>
-              <span className="text-[10px] text-slate-500 block">Eng Katta Yutuq:</span>
-              <span className="text-emerald-400 font-bold text-sm">
+              <span className="text-[10px] text-slate-400 font-medium block">Eng Katta Yutuq:</span>
+              <span className="text-emerald-400 font-bold text-sm tracking-tight">
                 {largestWinTrade ? `+$${largestWinTrade.net_pnl.toFixed(2)}` : '$0.00'}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-500 block">Eng Katta Zarar:</span>
-              <span className="text-rose-400 font-bold text-sm">
+              <span className="text-[10px] text-slate-400 font-medium block">Eng Katta Zarar:</span>
+              <span className="text-rose-400 font-bold text-sm tracking-tight">
                 {largestLossTrade ? `-$${Math.abs(largestLossTrade.net_pnl).toFixed(2)}` : '$0.00'}
               </span>
             </div>
           </div>
-          <span className="text-[10px] text-slate-500 truncate">
+          <span className="text-[10px] text-slate-400 font-medium truncate">
             {largestWinTrade ? `${largestWinTrade.instrument} • ${largestWinTrade.date}` : totalTrades > 0 ? 'Sdelkalar mavjud' : 'Sdelkalar kiritilmagan'}
           </span>
         </div>
@@ -624,7 +624,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                         {/* Day P&L content */}
                         {hasTrades ? (
                           <div className="mt-1">
-                            <div className={`text-xs sm:text-sm font-black font-mono tracking-tight ${
+                            <div className={`text-xs sm:text-sm font-bold font-mono tracking-tight ${
                               isGreen ? 'text-emerald-300' : 'text-rose-300'
                             }`}>
                               {isGreen ? '+' : ''}${day.pnl.toFixed(0)}
@@ -653,7 +653,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                     </span>
                     {week.weeklyCount > 0 ? (
                       <div>
-                        <div className={`text-xs sm:text-sm font-black tracking-tight ${
+                        <div className={`text-xs sm:text-sm font-bold tracking-tight ${
                           isWeekGreen ? 'text-emerald-300' : 'text-rose-300'
                         }`}>
                           {isWeekGreen ? '+' : ''}${week.weeklyPnl.toFixed(2)}
@@ -678,9 +678,9 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
               <span>Oylik Jami Sdelkalar: <strong className="text-white">{monthlyMetrics.mTrades} ta</strong></span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-emerald-400 font-bold">{monthlyMetrics.greenDays} Yashil kun</span>
-              <span className="text-rose-400 font-bold">{monthlyMetrics.redDays} Qizil kun</span>
-              <span className={`font-black ${monthlyMetrics.mPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <span className="text-emerald-400 font-semibold">{monthlyMetrics.greenDays} Yashil kun</span>
+              <span className="text-rose-400 font-semibold">{monthlyMetrics.redDays} Qizil kun</span>
+              <span className={`font-bold ${monthlyMetrics.mPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                 Oylik Sof: {monthlyMetrics.mPnl >= 0 ? '+' : ''}${monthlyMetrics.mPnl.toFixed(2)}
               </span>
             </div>
@@ -738,7 +738,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                       </div>
 
                       <div className="text-right">
-                        <div className={`text-xs font-mono font-black ${
+                        <div className={`text-xs font-mono font-bold tracking-tight ${
                           isGreen ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                           {isGreen ? '+' : ''}${t.net_pnl.toFixed(2)}

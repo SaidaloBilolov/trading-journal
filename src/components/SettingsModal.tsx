@@ -149,7 +149,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
           <div>
-            <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
               <Shield className="w-5 h-5 text-emerald-400" />
               <span>Dastur va Hisob Sozlamalari</span>
             </h3>

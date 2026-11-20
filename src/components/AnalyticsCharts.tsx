@@ -229,8 +229,8 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
         
         {/* Joriy Balans */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider block">Joriy Balans</span>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono mt-1">
+          <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">Joriy Balans</span>
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-white font-mono mt-1">
             ${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-xs font-mono text-slate-500 mt-1">
@@ -247,12 +247,12 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
             : 'bg-slate-900/90 border-slate-800 text-emerald-400'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-medium uppercase tracking-wider block">
+            <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
               Trailing Bufer
             </span>
             {currentTrailingBuffer < 300 && <Flame className="w-4 h-4 text-rose-500 animate-pulse" />}
           </div>
-          <div className="text-xl sm:text-2xl font-black font-mono mt-1">
+          <div className="text-xl sm:text-2xl font-bold tracking-tight font-mono mt-1">
             ${currentTrailingBuffer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-xs font-mono text-slate-500 mt-1">
@@ -262,8 +262,8 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
 
         {/* Sof P&L */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider block">Sof Foyda/Zarar</span>
-          <div className={`text-xl sm:text-2xl font-black font-mono mt-1 ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">Sof Foyda/Zarar</span>
+          <div className={`text-xl sm:text-2xl font-bold tracking-tight font-mono mt-1 ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
             {totalNetPnl >= 0 ? '+' : ''}${totalNetPnl.toFixed(2)}
           </div>
           <div className="text-xs font-mono text-slate-500 mt-1">
@@ -273,8 +273,8 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
 
         {/* Pikdan Drawdown */}
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider block">Pik Balans</span>
-          <div className="text-xl sm:text-2xl font-black text-cyan-400 font-mono mt-1">
+          <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">Pik Balans</span>
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-cyan-400 font-mono mt-1">
             ${currentPeakBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-xs font-mono text-slate-500 mt-1">
@@ -491,7 +491,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
 
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-400">Joriy Balans:</span>
-                <span className="text-white text-sm font-black">
+                <span className="text-white text-sm font-bold font-mono">
                   ${hoveredEquityPoint.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
@@ -632,7 +632,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                 <CheckCircle className="w-4 h-4" />
                 <span>Qoida bo‘yicha (A+)</span>
               </div>
-              <div className="text-2xl font-black text-white font-mono">
+              <div className="text-2xl font-bold tracking-tight text-white font-mono">
                 {aPlusNetPnl >= 0 ? '+' : ''}${aPlusNetPnl.toFixed(2)}
               </div>
               <div className="text-xs text-slate-400 font-mono">
@@ -646,7 +646,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                 <XCircle className="w-4 h-4" />
                 <span>Qoidasiz / Sweep‘siz</span>
               </div>
-              <div className="text-2xl font-black text-white font-mono">
+              <div className="text-2xl font-bold tracking-tight text-white font-mono">
                 {violationNetPnl >= 0 ? '+' : ''}${violationNetPnl.toFixed(2)}
               </div>
               <div className="text-xs text-slate-400 font-mono">

@@ -83,12 +83,12 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5 font-sans">
-                    TRADIFY & NOTION JOURNAL <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono">PRO</span>
+                  <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                    TRADIFY & NOTION JOURNAL <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-semibold">PRO</span>
                   </h1>
                 </div>
-                <p className="text-xs text-slate-400">
-                  Futures Savdo Jurnali • <span className="text-emerald-400 font-medium">116 ta Tradovate Sdelkalari</span>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  Futures Savdo Jurnali • <span className="text-emerald-400 font-semibold font-mono">116 ta Tradovate Sdelkalari</span>
                 </p>
               </div>
             </div>
@@ -135,42 +135,42 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Joriy Balans Card */}
-            <div className="bg-[#0b101b] border border-slate-800/80 rounded-2xl px-3.5 py-1.5 min-w-[140px] shadow-inner">
-              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium block">
+            <div className="bg-[#0b101b] border border-slate-800/80 rounded-2xl px-3.5 py-1.5 min-w-[150px] shadow-inner">
+              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
                 Joriy Balans
               </span>
-              <div className="flex items-baseline space-x-1.5">
-                <span className="text-base font-black text-white font-mono">
+              <div className="flex items-baseline space-x-1.5 mt-0.5">
+                <span className="text-base font-bold text-white font-mono tracking-tight">
                   ${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <span className={`text-[11px] font-bold font-mono ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className={`text-[11px] font-semibold font-mono ${totalNetPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {totalNetPnl >= 0 ? '+' : ''}${totalNetPnl.toFixed(2)}
                 </span>
               </div>
             </div>
 
             {/* Qolgan Xavfsiz Bufer Card (Trailing -2K) */}
-            <div className={`border rounded-2xl px-3.5 py-1.5 min-w-[175px] transition-all shadow-inner ${
+            <div className={`border rounded-2xl px-3.5 py-1.5 min-w-[210px] transition-all shadow-inner ${
               isBufferCritical 
                 ? 'bg-rose-950/40 border-rose-600/50 text-rose-300' 
                 : isBufferWarning
                 ? 'bg-amber-950/30 border-amber-500/40 text-amber-300'
                 : 'bg-[#0b101b] border-slate-800/80 text-emerald-400'
             }`}>
-              <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-medium text-slate-400">
-                <span className="flex items-center gap-1">
+              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-0.5">
+                <span className="flex items-center gap-1 shrink-0">
                   {isBufferCritical && <Flame className="w-3 h-3 text-rose-500 animate-pulse" />}
                   Qolgan Bufer
                 </span>
-                <span className="font-mono text-slate-500">
+                <span className="font-mono text-slate-500 text-[10px] shrink-0 font-medium">
                   Sliv: ${drawdownLimit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} {isStaticDD ? '(Statik)' : ''}
                 </span>
               </div>
-              <div className="flex items-baseline space-x-1">
-                <span className="text-base font-black font-mono">
+              <div className="flex items-baseline space-x-1.5">
+                <span className="text-base font-bold font-mono tracking-tight">
                   ${remainingBuffer.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <span className="text-[10px] text-slate-400">erkin risk</span>
+                <span className="text-[10px] text-slate-400 font-medium">erkin risk</span>
               </div>
               <div className="w-full bg-slate-800 rounded-full h-1 mt-1 overflow-hidden">
                 <div 

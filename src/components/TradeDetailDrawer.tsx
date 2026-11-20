@@ -113,7 +113,7 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
           {/* Header */}
           <div className="p-5 sm:p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
             <div className="flex items-center space-x-3">
-              <span className="text-xl font-black text-white font-mono bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
+              <span className="text-xl font-bold text-white font-mono bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
                 {trade.instrument}
               </span>
               {trade.account_name && (
@@ -151,10 +151,10 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
                 ? 'bg-rose-950/40 border-rose-500/50 text-rose-300'
                 : 'bg-slate-900 border-slate-800 text-slate-300'
             }`}>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">
                 Sof Natija (Net P&L)
               </span>
-              <div className="text-4xl font-black font-mono tracking-tight">
+              <div className="text-4xl font-bold font-mono tracking-tight">
                 {isProfit ? '+' : ''}${trade.net_pnl.toFixed(2)}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
@@ -493,7 +493,7 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
                     <div className="h-44 w-full relative flex flex-col justify-between select-none">
                       <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
                         <span>Yakuniy Sof P&L:</span>
-                        <span className={`font-black text-xs ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        <span className={`font-bold text-xs ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
                           {isProfit ? '+' : ''}${trade.net_pnl.toFixed(2)}
                         </span>
                       </div>

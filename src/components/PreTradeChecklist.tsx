@@ -100,7 +100,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
         <div className="p-4 rounded-2xl bg-rose-950/80 border-2 border-rose-500 text-rose-200 shadow-2xl flex items-start gap-4 animate-bounce">
           <ShieldAlert className="w-8 h-8 text-rose-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h3 className="text-base font-extrabold text-white tracking-wide">
+            <h3 className="text-base font-bold text-white tracking-wide">
               DIQQAT: KUNLIK QALQON ISHGA TUSHDI — SAVDONI TO‘XTATING!
             </h3>
             <p className="text-xs text-rose-300">
@@ -134,7 +134,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                 Min. ruxsat: {settings.min_checklist_score}/{totalCount}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white mt-1.5 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mt-1.5 tracking-tight">
               Savdodan Oldingi Majburiy Tekshiruv
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
@@ -169,12 +169,12 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-400 text-slate-950 text-[10px] font-bold uppercase tracking-wider">
                         YASHIL RUXSAT
                       </span>
                       <span className="text-xs text-emerald-300 font-mono">Ball: {currentScore}/{totalCount} (A+ Setup)</span>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-white mt-1">
+                    <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white mt-1">
                       SAVDO QILISH MUMKIN — SETUP TASDIQLANDI
                     </h3>
                     <p className="text-xs text-emerald-200/80 mt-0.5">
@@ -186,7 +186,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                 <button
                   onClick={handleCreateTrade}
                   disabled={isShieldLocked}
-                  className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-extrabold text-sm text-slate-950 shadow-xl transition-all ${
+                  className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm text-slate-950 shadow-xl transition-all ${
                     isShieldLocked
                       ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
                       : 'bg-emerald-400 hover:bg-emerald-300 shadow-emerald-500/40 hover:scale-105 active:scale-95'
@@ -219,7 +219,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                         !isSessionSweepChecked
                           ? 'bg-rose-500 text-white'
                           : 'bg-amber-400 text-slate-950'
@@ -230,7 +230,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                         Hozirgi ball: {currentScore} / {totalCount} (Kamida {settings.min_checklist_score} ta shart kerak)
                       </span>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-white mt-1">
+                    <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white mt-1">
                       {!isSessionSweepChecked
                         ? 'DIQQAT: SWEEP BO‘LMAGAN — KIRMA, SWEEP BO‘LGUNCHA KUT!'
                         : 'KUTING — SHARTLAR TO‘LIQ EMAS (SWEEP BO‘LMASA KIRMA)'}
@@ -299,7 +299,7 @@ export const PreTradeChecklist: React.FC<PreTradeChecklistProps> = ({
                         {item.title}
                       </h4>
                       {item.is_mandatory && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-rose-500/20 text-rose-300 border border-rose-500/30">
                           Majburiy Shart
                         </span>
                       )}

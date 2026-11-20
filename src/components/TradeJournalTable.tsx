@@ -309,7 +309,7 @@ export const TradeJournalTable: React.FC<TradeJournalTableProps> = ({
 
                       {/* Instrument */}
                       <td className="py-3.5 px-4 font-mono whitespace-nowrap">
-                        <span className="font-extrabold text-white px-2 py-1 rounded bg-slate-800/80 border border-slate-700/60">
+                        <span className="font-bold text-white px-2 py-1 rounded bg-slate-800/80 border border-slate-700/60">
                           {trade.instrument}
                         </span>
                       </td>

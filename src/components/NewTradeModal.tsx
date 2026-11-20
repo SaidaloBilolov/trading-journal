@@ -714,7 +714,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                           if (n > 0) setResultTag('PROFIT');
                           else if (n < 0) setResultTag('LOSS');
                         }}
-                        className="w-full bg-[#131b2e] border border-emerald-500/60 rounded-xl px-3.5 py-2.5 text-white font-mono font-black text-sm focus:outline-none focus:border-emerald-400 shadow-inner"
+                        className="w-full bg-[#131b2e] border border-emerald-500/60 rounded-xl px-3.5 py-2.5 text-white font-mono font-bold text-sm tracking-tight focus:outline-none focus:border-emerald-400 shadow-inner"
                       />
                     </div>
 

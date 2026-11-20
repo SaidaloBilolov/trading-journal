@@ -337,11 +337,11 @@ export const NotionJournalTable: React.FC<NotionJournalTableProps> = ({
                       {/* Соблюдал ли ты правила? */}
                       <td className="py-3 px-3 text-center whitespace-nowrap">
                         {followedRules ? (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-extrabold bg-[#17382d] text-[#86efac] border border-[#15803d]/40">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#17382d] text-[#86efac] border border-[#15803d]/40">
                             ДА
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-extrabold bg-[#43232c] text-[#fca5a5] border border-[#991b1b]/40">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#43232c] text-[#fca5a5] border border-[#991b1b]/40">
                             НЕТ
                           </span>
                         )}
