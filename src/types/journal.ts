@@ -55,6 +55,31 @@ export interface Trade {
   smt_divergence?: string; // SMT Divergence about (masalan: Silver uje sweep...)
   smt_nq?: string; // SMT Divergence NQ (link)
   smt_es?: string; // SMT Divergence ES (link)
+
+  // Account attribution
+  account_id?: string; // masalan: 'acc-tradify'
+  account_name?: string; // masalan: 'Tradify 50K'
+
+  // Specific setup checklists (galochkalar)
+  asia_sweep?: boolean;
+  london_sweep?: boolean;
+  htf_fvg_ob?: boolean;
+  ltf_confirmation?: boolean;
+  clear_target?: boolean;
+  risk_shield_ok?: boolean;
+}
+
+export interface PropAccount {
+  id: string;
+  name: string;
+  firm: string; // Tradify, Apex, Topstep, FundedNext, MyFundedFutures, Shaxsiy, Boshqa
+  initial_balance: number; // masalan: 50000
+  trailing_drawdown_amount: number; // masalan: 2000 (pikdan 2k pastda)
+  daily_loss_limit: number; // masalan: 1000
+  max_contracts: number; // masalan: 5
+  created_at: string;
+  is_active?: boolean;
+  description?: string;
 }
 
 export interface ChecklistItem {

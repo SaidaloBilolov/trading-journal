@@ -19,6 +19,7 @@ import { Trade } from '../types/journal';
 
 interface NotionJournalTableProps {
   trades: Trade[];
+  initialBalance?: number;
   onSelectTrade: (trade: Trade) => void;
   onEditTrade: (trade: Trade) => void;
   onDeleteTrade: (id: string) => void;
@@ -29,6 +30,7 @@ interface NotionJournalTableProps {
 
 export const NotionJournalTable: React.FC<NotionJournalTableProps> = ({
   trades,
+  initialBalance = 50000,
   onSelectTrade,
   onEditTrade,
   onDeleteTrade,
@@ -500,13 +502,55 @@ export const NotionJournalTable: React.FC<NotionJournalTableProps> = ({
           </table>
         </div>
 
-        {/* Footer */}
-        <div className="py-3 px-6 bg-[#070b14] border-t border-slate-800 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Jami ko‘rsatilgan sdelkalar: <strong className="text-white font-mono">{filteredTrades.length}</strong> ta</span>
-          <div className="flex items-center gap-4 font-mono">
-            <span>Yutuq: <strong className="text-emerald-400">{filteredTrades.filter((t) => t.net_pnl > 0).length}</strong></span>
-            <span>Zarar: <strong className="text-rose-400">{filteredTrades.filter((t) => t.net_pnl < 0).length}</strong></span>
-            <span>Sof P&L: <strong className={`font-bold ${filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>${filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0).toFixed(2)}</strong></span>
+        {/* Footer with Profit % and Metrics */}
+        <div className="py-3.5 px-6 bg-[#070b14] border-t border-slate-800 text-xs text-slate-400 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span>Jami ko‘rsatilgan sdelkalar: <strong className="text-white font-mono text-sm">{filteredTrades.length}</strong> ta</span>
+            <span className="text-slate-600">|</span>
+            <span>Win Rate: <strong className="text-cyan-400 font-mono text-sm">{filteredTrades.length > 0 ? ((filteredTrades.filter((t) => t.net_pnl > 0).length / filteredTrades.length) * 100).toFixed(1) : '0'}%</strong> ({filteredTrades.filter((t) => t.net_pnl > 0).length}W / {filteredTrades.filter((t) => t.net_pnl < 0).length}L)</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 font-mono">
+            {/* Profit Factor */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
+              <span className="text-slate-400 text-[11px]">Profit Factor:</span>
+              <span className="text-white font-bold">
+                {(() => {
+                  const wins = filteredTrades.filter((t) => t.net_pnl > 0).reduce((sum, t) => sum + t.net_pnl, 0);
+                  const losses = Math.abs(filteredTrades.filter((t) => t.net_pnl < 0).reduce((sum, t) => sum + t.net_pnl, 0));
+                  return losses > 0 ? (wins / losses).toFixed(2) : wins > 0 ? 'MAX' : '0.00';
+                })()}
+              </span>
+            </div>
+
+            {/* Foyda Foizi (%) */}
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-bold ${
+              filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0) >= 0 
+                ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-400' 
+                : 'bg-rose-950/30 border-rose-500/40 text-rose-400'
+            }`}>
+              <span className="text-slate-400 font-normal text-[11px]">Foyda (%):</span>
+              <span className="text-sm">
+                {(() => {
+                  const total = filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0);
+                  const pct = ((total / (initialBalance || 50000)) * 100).toFixed(2);
+                  return `${Number(pct) >= 0 ? '+' : ''}${pct}%`;
+                })()}
+              </span>
+            </div>
+
+            {/* Sof P&L ($) */}
+            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-bold ${
+              filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0) >= 0 
+                ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-300' 
+                : 'bg-rose-950/40 border-rose-500/60 text-rose-300'
+            }`}>
+              <span className="text-slate-400 font-normal text-[11px]">Sof P&L:</span>
+              <span className="text-sm">
+                {filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0) >= 0 ? '+' : ''}$
+                {filteredTrades.reduce((acc, t) => acc + t.net_pnl, 0).toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
 

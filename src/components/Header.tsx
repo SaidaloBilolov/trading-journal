@@ -10,9 +10,11 @@ import {
   CloudOff,
   Flame,
   Calendar,
-  FileText
+  FileText,
+  Building2,
+  ChevronDown
 } from 'lucide-react';
-import { UserSettings } from '../types/journal';
+import { UserSettings, PropAccount } from '../types/journal';
 
 interface HeaderProps {
   activeTab: 'checklist' | 'notion' | 'tradify' | 'analytics';
@@ -22,6 +24,9 @@ interface HeaderProps {
   peakBalance?: number;
   settings: UserSettings;
   isSupabaseConnected: boolean;
+  activeAccount?: PropAccount;
+  accounts: PropAccount[];
+  onOpenPropModal: () => void;
   onOpenNewTrade: () => void;
   onOpenSettings: () => void;
   onExportExcel: () => void;
@@ -36,15 +41,20 @@ export const Header: React.FC<HeaderProps> = ({
   peakBalance,
   settings,
   isSupabaseConnected,
+  activeAccount,
+  accounts,
+  onOpenPropModal,
   onOpenNewTrade,
   onOpenSettings,
   onExportExcel,
   onExportPDF,
 }) => {
-  const effectivePeak = peakBalance || Math.max(settings.initial_balance, currentBalance);
-  const trailingDrawdownLimit = effectivePeak - 2000;
+  const trailingDrawdownAmount = activeAccount?.trailing_drawdown_amount || 2000;
+  const initialBalance = activeAccount?.initial_balance || settings.initial_balance || 50000;
+  const effectivePeak = peakBalance || Math.max(initialBalance, currentBalance);
+  const trailingDrawdownLimit = effectivePeak - trailingDrawdownAmount;
   const remainingBuffer = Math.max(0, currentBalance - trailingDrawdownLimit);
-  const bufferPercent = Math.min(100, (remainingBuffer / 2000) * 100);
+  const bufferPercent = Math.min(100, (remainingBuffer / trailingDrawdownAmount) * 100);
 
   // Buffer warning level
   const isBufferCritical = remainingBuffer <= 300;
@@ -96,6 +106,26 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Balance & Drawdown Buffer Monitor */}
           <div className="flex items-center gap-3 overflow-x-auto py-1">
+            {/* Prop Account Switcher Pill */}
+            <button
+              onClick={onOpenPropModal}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-cyan-950/30 hover:bg-cyan-900/50 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 transition shadow-sm text-left shrink-0"
+              title="Prop hisobni tanlash yoki yangi qo‘shish"
+            >
+              <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400">
+                <Building2 className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-wider text-cyan-400/80 block font-bold leading-none">
+                  Prop Hisob
+                </span>
+                <span className="text-xs font-bold font-mono text-white flex items-center gap-1 leading-tight mt-0.5">
+                  {activeAccount?.name || 'Tradify 50K'}
+                  <ChevronDown className="w-3 h-3 text-cyan-400" />
+                </span>
+              </div>
+            </button>
+
             {/* Joriy Balans Card */}
             <div className="bg-[#0b101b] border border-slate-800/80 rounded-2xl px-3.5 py-1.5 min-w-[140px] shadow-inner">
               <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium block">

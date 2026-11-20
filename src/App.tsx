@@ -8,7 +8,8 @@ import { TradeDetailDrawer } from './components/TradeDetailDrawer';
 import { NewTradeModal } from './components/NewTradeModal';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
 import { SettingsModal } from './components/SettingsModal';
-import { Trade, UserSettings, ChecklistItem } from './types/journal';
+import { PropAccountModal } from './components/PropAccountModal';
+import { Trade, UserSettings, ChecklistItem, PropAccount } from './types/journal';
 import { 
   fetchAllTrades, 
   createTradeRecord, 
@@ -18,6 +19,10 @@ import {
   setLocalSettings, 
   getLocalChecklistItems, 
   setLocalChecklistItems,
+  getLocalPropAccounts,
+  setLocalPropAccounts,
+  getActiveAccountId,
+  setActiveAccountId,
   resetAllToDemo
 } from './services/storage';
 import { exportTradesToExcel } from './utils/excelExport';
@@ -30,6 +35,11 @@ export function App() {
   const [settings, setSettings] = useState<UserSettings>(getLocalSettings());
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(getLocalChecklistItems());
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
+
+  // Prop Accounts state
+  const [accounts, setAccounts] = useState<PropAccount[]>(getLocalPropAccounts());
+  const [activeAccountId, setActiveAccountIdState] = useState<string>(getActiveAccountId());
+  const [isPropModalOpen, setIsPropModalOpen] = useState(false);
   
   // Modals & Drawers state
   const [isNewTradeModalOpen, setIsNewTradeModalOpen] = useState(false);
@@ -60,35 +70,83 @@ export function App() {
     loadData();
   }, []);
 
-  // Today's summary calculations
+  // Active Prop Account
+  const activeAccount = useMemo(() => {
+    return accounts.find((a) => a.id === activeAccountId) || accounts[0] || {
+      id: 'acc-tradify',
+      name: 'Tradify 50K',
+      firm: 'Tradify',
+      initial_balance: 50000,
+      trailing_drawdown_amount: 2000,
+      daily_loss_limit: 1000,
+      max_contracts: 5,
+      created_at: new Date().toISOString(),
+    };
+  }, [accounts, activeAccountId]);
+
+  // Active Account Trades (Filter only trades of this account)
+  const activeTrades = useMemo(() => {
+    return trades.filter((t) => (t.account_id || 'acc-tradify') === activeAccount.id);
+  }, [trades, activeAccount.id]);
+
+  // Today's summary calculations for active account
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   
   const todayTrades = useMemo(() => {
-    return trades.filter((t) => t.date === todayStr);
-  }, [trades, todayStr]);
+    return activeTrades.filter((t) => t.date === todayStr);
+  }, [activeTrades, todayStr]);
 
   const todayTradeCount = todayTrades.length;
   const todayNetPnl = useMemo(() => todayTrades.reduce((acc, t) => acc + t.net_pnl, 0), [todayTrades]);
   const todayWins = useMemo(() => todayTrades.filter((t) => t.net_pnl > 0).length, [todayTrades]);
   const todayLosses = useMemo(() => todayTrades.filter((t) => t.net_pnl < 0).length, [todayTrades]);
 
-  // Total Net P&L & Current Balance
-  const totalNetPnl = useMemo(() => trades.reduce((acc, t) => acc + t.net_pnl, 0), [trades]);
-  const currentBalance = settings.initial_balance + totalNetPnl;
+  // Balances for active account
+  const activeInitialBalance = activeAccount.initial_balance || 50000;
+  const activeTotalNetPnl = useMemo(() => activeTrades.reduce((acc, t) => acc + t.net_pnl, 0), [activeTrades]);
+  const activeCurrentBalance = activeInitialBalance + activeTotalNetPnl;
 
-  // Peak Balance for Trailing Drawdown (-2K)
-  const peakBalance = useMemo(() => {
-    let running = settings.initial_balance;
-    let peak = settings.initial_balance;
-    const sorted = [...trades].sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
+  // Peak Balance for Trailing Drawdown
+  const activePeakBalance = useMemo(() => {
+    let running = activeInitialBalance;
+    let peak = activeInitialBalance;
+    const sorted = [...activeTrades].sort(
+      (a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime()
+    );
     sorted.forEach((t) => {
       running += t.net_pnl;
       if (running > peak) peak = running;
     });
     return peak;
-  }, [trades, settings.initial_balance]);
+  }, [activeTrades, activeInitialBalance]);
 
-  // Handlers
+  // Handlers for Accounts
+  const handleSelectAccount = (id: string) => {
+    setActiveAccountIdState(id);
+    setActiveAccountId(id);
+    const target = accounts.find((a) => a.id === id);
+    showToast(`"${target?.name || id}" hisobi faollashtirildi`);
+  };
+
+  const handleAddAccount = (acc: PropAccount) => {
+    const updated = [...accounts, acc];
+    setAccounts(updated);
+    setLocalPropAccounts(updated);
+    handleSelectAccount(acc.id);
+    showToast(`"${acc.name}" prop hisobi muvaffaqiyatli qo‘shildi!`);
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    const updated = accounts.filter((a) => a.id !== id);
+    setAccounts(updated);
+    setLocalPropAccounts(updated);
+    if (activeAccountId === id) {
+      handleSelectAccount(updated[0]?.id || 'acc-tradify');
+    }
+    showToast('Prop hisob o‘chirildi');
+  };
+
+  // Handlers for Trades
   const handleOpenTradeWithChecklist = (score: number, total: number, sweepPassed: boolean) => {
     setPrefillChecklistScore(score);
     setPrefillChecklistTotal(total);
@@ -154,8 +212,8 @@ export function App() {
 
   const handleExportExcel = () => {
     try {
-      exportTradesToExcel(trades, settings);
-      showToast('Excel (.xlsx) fayli muvaffaqiyatli yuklab olindi!');
+      exportTradesToExcel(activeTrades, settings);
+      showToast(`"${activeAccount.name}" bo‘yicha Excel (.xlsx) fayli yuklab olindi!`);
     } catch (e) {
       console.error(e);
       showToast('Eksportda xatolik yuz berdi');
@@ -164,8 +222,8 @@ export function App() {
 
   const handleExportPDF = () => {
     try {
-      exportTradesToPDF(trades, settings);
-      showToast('PDF (.pdf) hisoboti yuklab olindi!');
+      exportTradesToPDF(activeTrades, settings, activeAccount);
+      showToast(`"${activeAccount.name}" bo‘yicha PDF (.pdf) hisoboti yuklab olindi!`);
     } catch (e) {
       console.error(e);
       showToast('PDF eksportida xatolik yuz berdi');
@@ -192,11 +250,14 @@ export function App() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        currentBalance={currentBalance}
-        totalNetPnl={totalNetPnl}
-        peakBalance={peakBalance}
+        currentBalance={activeCurrentBalance}
+        totalNetPnl={activeTotalNetPnl}
+        peakBalance={activePeakBalance}
         settings={settings}
         isSupabaseConnected={isSupabaseConnected}
+        activeAccount={activeAccount}
+        accounts={accounts}
+        onOpenPropModal={() => setIsPropModalOpen(true)}
         onOpenNewTrade={handleOpenNewTrade}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onExportExcel={handleExportExcel}
@@ -209,7 +270,7 @@ export function App() {
         {/* TAB 1: TRADIFY & P&L KALENDAR (SCREENSHOT 6) */}
         {activeTab === 'tradify' && (
           <TradifyDashboard
-            trades={trades}
+            trades={activeTrades}
             settings={settings}
             onSelectTrade={(t) => setSelectedTradeForDetail(t)}
           />
@@ -218,7 +279,8 @@ export function App() {
         {/* TAB 2: NOTION USLUBIDAGI TO'LIQ JURNAL (SCREENSHOTS 1-4) */}
         {activeTab === 'notion' && (
           <NotionJournalTable
-            trades={trades}
+            trades={activeTrades}
+            initialBalance={activeInitialBalance}
             onSelectTrade={(t) => setSelectedTradeForDetail(t)}
             onEditTrade={handleEditTrade}
             onDeleteTrade={handleDeleteTrade}
@@ -253,7 +315,9 @@ export function App() {
             <div className="bg-[#0b101b] border border-slate-800/80 rounded-3xl p-5 sm:p-6 backdrop-blur-md shadow-xl">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div>
-                  <h3 className="text-base font-bold text-white">Oxirgi Qayd Etilgan Sdelkalar</h3>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    Oxirgi Qayd Etilgan Sdelkalar ({activeAccount.name})
+                  </h3>
                   <p className="text-xs text-slate-400">Jurnalga kiritilgan eng so‘nggi savdo amallari</p>
                 </div>
                 <button
@@ -266,7 +330,7 @@ export function App() {
               </div>
 
               <div className="divide-y divide-slate-800/60 mt-2">
-                {trades.slice(0, 5).map((tr) => (
+                {activeTrades.slice(0, 5).map((tr) => (
                   <div
                     key={tr.id}
                     onClick={() => setSelectedTradeForDetail(tr)}
@@ -299,11 +363,14 @@ export function App() {
           </div>
         )}
 
-        {/* TAB 4: STATISTIKA & TRAILING 2K DRAWDOWN GRAFIGI */}
+        {/* TAB 4: STATISTIKA & TRAILING DRAWDOWN GRAFIGI */}
         {activeTab === 'analytics' && (
           <AnalyticsCharts
-            trades={trades}
+            trades={activeTrades}
             settings={settings}
+            initialBalance={activeInitialBalance}
+            trailingDrawdown={activeAccount.trailing_drawdown_amount}
+            accountName={activeAccount.name}
           />
         )}
 
@@ -319,15 +386,29 @@ export function App() {
         onUpdateLink={handleUpdateLink}
       />
 
-      {/* New / Edit Trade Modal */}
+      {/* New / Edit Trade Modal with all Notion fields & checkboxes */}
       <NewTradeModal
         isOpen={isNewTradeModalOpen}
         onClose={() => setIsNewTradeModalOpen(false)}
         onSave={handleSaveTrade}
         editTrade={editingTrade}
+        accounts={accounts}
+        activeAccountId={activeAccountId}
         prefillChecklistScore={prefillChecklistScore}
         prefillChecklistTotal={prefillChecklistTotal}
         prefillSessionSweep={prefillSessionSweep}
+      />
+
+      {/* Prop Account Manager Modal */}
+      <PropAccountModal
+        isOpen={isPropModalOpen}
+        onClose={() => setIsPropModalOpen(false)}
+        accounts={accounts}
+        activeAccountId={activeAccountId}
+        onSelectAccount={handleSelectAccount}
+        onAddAccount={handleAddAccount}
+        onDeleteAccount={handleDeleteAccount}
+        allTrades={trades}
       />
 
       {/* Settings & Supabase Modal */}
@@ -344,13 +425,16 @@ export function App() {
       {/* Footer in Uzbek */}
       <footer className="border-t border-slate-900 bg-[#070b14] py-6 mt-12 text-xs text-slate-500 text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Tradify & Notion Trading Journal. 116 ta Tradovate sdelkalari va Trailing 2K Drawdown himoyasi.</p>
+          <p>© 2026 Tradify & Notion Trading Journal. {activeAccount.name} bo‘yicha {activeTrades.length} ta sdelka va Trailing Drawdown himoyasi.</p>
           <div className="flex items-center gap-4">
             <button onClick={handleExportExcel} className="hover:text-emerald-400 flex items-center gap-1">
               <Download className="w-3.5 h-3.5" /> Excel (.xlsx)
             </button>
             <button onClick={handleExportPDF} className="hover:text-rose-400 flex items-center gap-1">
               <FileText className="w-3.5 h-3.5" /> PDF (.pdf)
+            </button>
+            <button onClick={() => setIsPropModalOpen(true)} className="hover:text-cyan-400">
+              Prop Hisoblar
             </button>
             <button onClick={() => setIsSettingsModalOpen(true)} className="hover:text-slate-300">
               Supabase Sozlamalari

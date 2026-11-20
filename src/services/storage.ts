@@ -1,10 +1,69 @@
-import { ChecklistItem, Trade, UserSettings } from '../types/journal';
+import { ChecklistItem, Trade, UserSettings, PropAccount } from '../types/journal';
 import { DEFAULT_CHECKLIST_ITEMS, DEFAULT_SETTINGS, INITIAL_TRADES } from '../constants/initialData';
 import { getSupabaseClient } from './supabase';
 
 const TRADES_STORAGE_KEY = 'trading_journal_sdelkalar_v2_tradovate';
 const SETTINGS_STORAGE_KEY = 'trading_journal_sozlamalar_v2_tradovate';
 const CHECKLIST_STORAGE_KEY = 'trading_journal_tekshiruv_v2_tradovate';
+const PROP_ACCOUNTS_STORAGE_KEY = 'trading_journal_prop_accounts_v1';
+const ACTIVE_ACCOUNT_STORAGE_KEY = 'trading_journal_active_account_id_v1';
+
+export const DEFAULT_PROP_ACCOUNTS: PropAccount[] = [
+  {
+    id: 'acc-tradify',
+    name: 'Tradify 50K',
+    firm: 'Tradify',
+    initial_balance: 50000,
+    trailing_drawdown_amount: 2000,
+    daily_loss_limit: 1000,
+    max_contracts: 5,
+    created_at: '2026-10-01T00:00:00Z',
+    is_active: true,
+    description: 'Tradovate MNQ / MGC mikro sdelkalar hisobi',
+  },
+];
+
+// Helper: Prop Accounts
+export const getLocalPropAccounts = (): PropAccount[] => {
+  try {
+    const raw = localStorage.getItem(PROP_ACCOUNTS_STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(PROP_ACCOUNTS_STORAGE_KEY, JSON.stringify(DEFAULT_PROP_ACCOUNTS));
+      return DEFAULT_PROP_ACCOUNTS;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_PROP_ACCOUNTS;
+  } catch (e) {
+    console.error('Lokal prop hisoblarni o‘qishda xatolik:', e);
+    return DEFAULT_PROP_ACCOUNTS;
+  }
+};
+
+export const setLocalPropAccounts = (accounts: PropAccount[]): void => {
+  try {
+    localStorage.setItem(PROP_ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+  } catch (e) {
+    console.error('Lokal prop hisoblarni saqlashda xatolik:', e);
+  }
+};
+
+export const getActiveAccountId = (): string => {
+  try {
+    const saved = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+    if (saved) return saved;
+  } catch (e) {
+    // fallback
+  }
+  return 'acc-tradify';
+};
+
+export const setActiveAccountId = (id: string): void => {
+  try {
+    localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, id);
+  } catch (e) {
+    console.error('Faol hisobni saqlashda xatolik:', e);
+  }
+};
 
 // Helper: LocalStorage
 export const getLocalTrades = (): Trade[] => {
@@ -14,7 +73,14 @@ export const getLocalTrades = (): Trade[] => {
       localStorage.setItem(TRADES_STORAGE_KEY, JSON.stringify(INITIAL_TRADES));
       return INITIAL_TRADES;
     }
-    return JSON.parse(raw);
+    const parsed: Trade[] = JSON.parse(raw);
+    // Ensure all trades have account_id
+    const normalized = parsed.map((t) => ({
+      ...t,
+      account_id: t.account_id || 'acc-tradify',
+      account_name: t.account_name || 'Tradify 50K',
+    }));
+    return normalized;
   } catch (e) {
     console.error('Lokal sdelkalarni o‘qishda xatolik:', e);
     return INITIAL_TRADES;
