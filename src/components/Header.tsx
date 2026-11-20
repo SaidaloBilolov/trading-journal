@@ -12,7 +12,8 @@ import {
   ChevronDown,
   FlaskConical,
   User,
-  LogOut
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import { UserSettings, PropAccount, AppUser } from '../types/journal';
 
@@ -150,22 +151,50 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Prop Account Switcher Pill */}
+            {/* Account Switcher Pill (Prop / Real / Backtest) */}
             <button
               onClick={onOpenPropModal}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-cyan-950/30 hover:bg-cyan-900/50 border border-cyan-500/40 text-cyan-300 hover:border-cyan-400 transition shadow-sm text-left shrink-0"
-              title="Prop hisobni tanlash yoki yangi qo‘shish"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border transition shadow-sm text-left shrink-0 ${
+                activeAccount?.account_type === 'real' || activeAccount?.name?.toLowerCase().includes('real')
+                  ? 'bg-amber-950/30 hover:bg-amber-900/50 border-amber-500/50 text-amber-300'
+                  : activeAccount?.firm === 'Backtest' || activeAccount?.account_type === 'backtest'
+                  ? 'bg-purple-950/30 hover:bg-purple-900/50 border-purple-500/50 text-purple-300'
+                  : 'bg-cyan-950/30 hover:bg-cyan-900/50 border-cyan-500/40 text-cyan-300 hover:border-cyan-400'
+              }`}
+              title="Hisobni tanlash yoki yangi qo‘shish"
             >
-              <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400">
-                <Building2 className="w-3.5 h-3.5" />
+              <div className={`p-1 rounded-lg ${
+                activeAccount?.account_type === 'real' || activeAccount?.name?.toLowerCase().includes('real')
+                  ? 'bg-amber-500/10 text-amber-400'
+                  : activeAccount?.firm === 'Backtest' || activeAccount?.account_type === 'backtest'
+                  ? 'bg-purple-500/10 text-purple-400'
+                  : 'bg-cyan-500/10 text-cyan-400'
+              }`}>
+                {activeAccount?.account_type === 'real' || activeAccount?.name?.toLowerCase().includes('real') ? (
+                  <Sparkles className="w-3.5 h-3.5" />
+                ) : activeAccount?.firm === 'Backtest' || activeAccount?.account_type === 'backtest' ? (
+                  <FlaskConical className="w-3.5 h-3.5" />
+                ) : (
+                  <Building2 className="w-3.5 h-3.5" />
+                )}
               </div>
               <div>
-                <span className="text-[9px] uppercase tracking-wider text-cyan-400/80 block font-bold leading-none">
-                  Prop Hisob
+                <span className={`text-[9px] uppercase tracking-wider block font-bold leading-none ${
+                  activeAccount?.account_type === 'real' || activeAccount?.name?.toLowerCase().includes('real')
+                    ? 'text-amber-400'
+                    : activeAccount?.firm === 'Backtest' || activeAccount?.account_type === 'backtest'
+                    ? 'text-purple-400'
+                    : 'text-cyan-400/80'
+                }`}>
+                  {activeAccount?.account_type === 'real' || activeAccount?.name?.toLowerCase().includes('real')
+                    ? 'Real Hisob'
+                    : activeAccount?.firm === 'Backtest' || activeAccount?.account_type === 'backtest'
+                    ? 'Backtest'
+                    : 'Prop Hisob'}
                 </span>
                 <span className="text-xs font-bold font-mono text-white flex items-center gap-1 leading-tight mt-0.5">
                   {activeAccount?.name || 'Tradify 50K'}
-                  <ChevronDown className="w-3 h-3 text-cyan-400" />
+                  <ChevronDown className="w-3 h-3 opacity-70" />
                 </span>
               </div>
             </button>
