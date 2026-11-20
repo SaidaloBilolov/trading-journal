@@ -334,7 +334,9 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
       account_id: accountId,
       account_name: activeAccObj ? activeAccObj.name : 'Tradify 50K',
       date,
-      time: isBacktest ? '' : (time || new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false })),
+      time: isBacktest 
+        ? '' 
+        : (editTrade?.time || new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false })),
       instrument: instrument.trim().toUpperCase(),
       direction,
       quantity: Number(quantity) || 1,
@@ -733,21 +735,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                   </summary>
                   
                   <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-3">
-                    <div className={`grid ${isBacktest ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
-                      {!isBacktest && (
-                        <div>
-                          <label className="block text-[10px] text-slate-500 mb-0.5 flex items-center justify-between">
-                            <span>Vaqt:</span>
-                            <span className="text-[9px] text-cyan-400 font-mono">Real vaqt</span>
-                          </label>
-                          <input
-                            type="time"
-                            value={time}
-                            onChange={(e) => setTime(e.target.value)}
-                            className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
-                          />
-                        </div>
-                      )}
+                    <div className="grid grid-cols-3 gap-2">
                       <div>
                         <label className="block text-[10px] text-slate-500 mb-0.5">Kontrakt (Qty):</label>
                         <input
