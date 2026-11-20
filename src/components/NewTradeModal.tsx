@@ -43,23 +43,21 @@ interface NewTradeModalProps {
 }
 
 export const POPULAR_INSTRUMENTS = [
-  { symbol: 'MNQZ6', name: 'MNQZ6 (Nasdaq Micro Futures)' },
-  { symbol: 'MNQ', name: 'MNQ (Nasdaq 100 Micro)' },
-  { symbol: 'NQ', name: 'NQ (Nasdaq 100 E-mini)' },
-  { symbol: 'NAS100', name: 'NAS100 (Nasdaq 100 Index)' },
-  { symbol: 'MESZ6', name: 'MESZ6 (SPX 500 Micro Futures)' },
-  { symbol: 'MES', name: 'MES (SPX 500 Micro)' },
-  { symbol: 'ES', name: 'ES (SPX 500 E-mini)' },
-  { symbol: 'SPX500', name: 'SPX 500 (S&P 500 Index)' },
-  { symbol: 'MGCZ6', name: 'MGCZ6 (Gold Micro Futures)' },
-  { symbol: 'MGC', name: 'MGC (Gold Micro)' },
-  { symbol: 'GC', name: 'GC (Gold Futures)' },
-  { symbol: 'XAU/USD', name: 'XAU/USD (Gold Spot)' },
-  { symbol: 'MYM', name: 'MYM (Dow Jones Micro)' },
-  { symbol: 'YM', name: 'YM (Dow Jones E-mini)' },
-  { symbol: 'M2K', name: 'M2K (Russell 2000 Micro)' },
-  { symbol: 'CL', name: 'CL (Crude Oil / Neft)' },
+  { symbol: 'MNQ', name: 'MNQ (Nasdaq)' },
+  { symbol: 'MES', name: 'MES (ES / SPX 500)' },
+  { symbol: 'MGC', name: 'MGC (Gold)' },
   { symbol: 'CUSTOM', name: '✏️ Boshqa instrument (qo‘lda yozish)' },
+];
+
+export const SESSION_OPTIONS = [
+  { value: 'После открытия рынка (9:30)', label: 'После открытия рынка (9:30)' },
+  { value: '13:10 – 13:40 EST', label: '13:10 – 13:40 EST' },
+  { value: 'New York AM (09:30 - 11:30)', label: 'New York AM (09:30 - 11:30)' },
+  { value: 'New York PM (13:30 - 16:00)', label: 'New York PM (13:30 - 16:00)' },
+  { value: 'London sessiyasi (London Open)', label: 'London sessiyasi (London Open)' },
+  { value: 'Asia / Osiyo sessiyasi', label: 'Asia / Osiyo sessiyasi' },
+  { value: 'Pre-Market (08:30 - 09:30)', label: 'Pre-Market (08:30 - 09:30)' },
+  { value: 'CUSTOM', label: '✏️ Boshqa sessiya (qo‘lda yozish)' },
 ];
 
 export const NewTradeModal: React.FC<NewTradeModalProps> = ({
@@ -81,8 +79,9 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
 
   // Order Name
   const [orderName, setOrderName] = useState('Order');
-  const [instrument, setInstrument] = useState('MNQZ6');
+  const [instrument, setInstrument] = useState('MNQ');
   const [isCustomInstrument, setIsCustomInstrument] = useState(false);
+  const [isCustomSession, setIsCustomSession] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState(
     new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false })
@@ -150,7 +149,9 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
     if (editTrade) {
       setAccountId(editTrade.account_id || activeAccountId || 'acc-tradify');
       setOrderName('Order');
-      setInstrument(editTrade.instrument || 'MNQZ6');
+      const isKnownInst = POPULAR_INSTRUMENTS.some((i) => i.symbol === editTrade.instrument);
+      setInstrument(editTrade.instrument || 'MNQ');
+      setIsCustomInstrument(!isKnownInst && !!editTrade.instrument);
       setDate(editTrade.date);
       setTime(editTrade.time);
       setDirection(editTrade.direction);
@@ -181,7 +182,9 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
 
       setEntryReason(editTrade.entry_reason || '');
       setSlReason(editTrade.sl_reason || '');
+      const isKnownSess = SESSION_OPTIONS.some((s) => s.value === editTrade.trading_session);
       setTradingSession(editTrade.trading_session || 'После открытия рынка (9:30)');
+      setIsCustomSession(!isKnownSess && !!editTrade.trading_session);
       setNews(editTrade.news || '');
       setMistakeCategory(editTrade.mistake_category || (editTrade.net_pnl >= 0 ? '🟢 Нет ошибки (TP)' : 'Fomo / Shoshilish'));
       setHtfTrend(editTrade.htf_trend || '🟢 Bullish');
@@ -197,7 +200,8 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
     } else {
       setAccountId(activeAccountId || 'acc-tradify');
       setOrderName('Order');
-      setInstrument('MNQZ6');
+      setInstrument('MNQ');
+      setIsCustomInstrument(false);
       setDate(new Date().toISOString().split('T')[0]);
       setTime(new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false }));
       setDirection('Long');
@@ -229,6 +233,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
       setEntryReason('');
       setSlReason('');
       setTradingSession('После открытия рынка (9:30)');
+      setIsCustomSession(false);
       setNews('');
       setMistakeCategory('🟢 Нет ошибки (TP)');
       setHtfTrend('🟢 Bullish');
@@ -514,12 +519,11 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                     )}
 
                     {/* Quick Select Badges */}
-                    <div className="flex flex-wrap gap-1 mt-1.5">
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {[
-                        { s: 'MNQZ6', l: 'MNQ (Nasdaq)' },
-                        { s: 'MESZ6', l: 'MES (SPX 500)' },
-                        { s: 'MGCZ6', l: 'MGC (Gold)' },
-                        { s: 'XAU/USD', l: 'XAU (Gold)' },
+                        { s: 'MNQ', l: 'MNQ (Nasdaq)' },
+                        { s: 'MES', l: 'MES (ES / SPX 500)' },
+                        { s: 'MGC', l: 'MGC (Gold)' },
                       ].map((item) => (
                         <button
                           key={item.s}
@@ -528,7 +532,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                             setInstrument(item.s);
                             setIsCustomInstrument(false);
                           }}
-                          className={`text-[9.5px] font-mono px-2 py-0.5 rounded-lg border transition ${
+                          className={`text-[10px] font-mono px-2.5 py-0.5 rounded-lg border transition ${
                             instrument === item.s
                               ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
                               : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
@@ -1027,16 +1031,77 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                 {/* Sessiya va Xatolar */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Торговая сессия
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="После открытия рынка (9:30), 13:10 – 13:40 EST..."
-                      value={tradingSession}
-                      onChange={(e) => setTradingSession(e.target.value)}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white text-xs"
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-slate-300 font-medium">
+                        Торговая сессия
+                      </label>
+                      {tradingSession && (
+                        <span className="text-[10px] text-cyan-400 font-medium truncate max-w-[140px]">
+                          {tradingSession}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Session Dropdown */}
+                    <select
+                      value={
+                        SESSION_OPTIONS.some((s) => s.value === tradingSession)
+                          ? tradingSession
+                          : 'CUSTOM'
+                      }
+                      onChange={(e) => {
+                        if (e.target.value !== 'CUSTOM') {
+                          setTradingSession(e.target.value);
+                          setIsCustomSession(false);
+                        } else {
+                          setIsCustomSession(true);
+                        }
+                      }}
+                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                    >
+                      {SESSION_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Custom input if "CUSTOM" or not in predefined list */}
+                    {(isCustomSession || !SESSION_OPTIONS.some((s) => s.value === tradingSession)) && (
+                      <input
+                        type="text"
+                        placeholder="Sessiyani kiriting: masalan 11:30 - 12:30 Lunch..."
+                        value={tradingSession}
+                        onChange={(e) => setTradingSession(e.target.value)}
+                        className="w-full mt-1.5 bg-[#131b2e] border border-cyan-500/60 rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:border-cyan-400 animate-in fade-in duration-100"
+                      />
+                    )}
+
+                    {/* Quick Session Badges */}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {[
+                        { v: 'После открытия рынка (9:30)', l: '9:30 Open' },
+                        { v: '13:10 – 13:40 EST', l: '13:10–13:40' },
+                        { v: 'New York AM (09:30 - 11:30)', l: 'NY AM' },
+                        { v: 'London sessiyasi (London Open)', l: 'London' },
+                      ].map((s) => (
+                        <button
+                          key={s.v}
+                          type="button"
+                          onClick={() => {
+                            setTradingSession(s.v);
+                            setIsCustomSession(false);
+                          }}
+                          className={`text-[9.5px] px-2 py-0.5 rounded-lg border transition ${
+                            tradingSession === s.v
+                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {s.l}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div>
