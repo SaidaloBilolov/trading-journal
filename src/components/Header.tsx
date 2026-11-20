@@ -129,33 +129,43 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Balance & Drawdown Buffer Monitor */}
           <div className="flex items-center gap-3 overflow-x-auto py-1">
-            {/* Active User Profile Pill */}
-            <button
-              onClick={onOpenLogin}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border transition shadow-sm text-left shrink-0 ${
-                currentUser?.username === 'shaxzod'
-                  ? 'bg-cyan-950/40 hover:bg-cyan-900/60 border-cyan-500/50 text-cyan-200'
-                  : 'bg-emerald-950/30 hover:bg-emerald-900/50 border-emerald-500/40 text-emerald-200'
-              }`}
-              title="Profilni almashtirish yoki chiqish"
-            >
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] ${
-                currentUser?.username === 'shaxzod'
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-              }`}>
-                {currentUser?.avatar || 'SB'}
+            {/* Active User Profile Pill with Logout */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border transition shadow-sm text-left ${
+                  currentUser?.username === 'shaxzod'
+                    ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-200'
+                    : 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] ${
+                  currentUser?.username === 'shaxzod'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                }`}>
+                  {currentUser?.avatar || 'SB'}
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold leading-none">
+                    Treydir
+                  </span>
+                  <span className="text-xs font-bold text-white block leading-tight mt-0.5">
+                    {currentUser?.name || "Saida'lo (Said)"}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold leading-none">
-                  Treydir
-                </span>
-                <span className="text-xs font-bold text-white flex items-center gap-1 leading-tight mt-0.5">
-                  {currentUser?.name || "Saida'lo (Said)"}
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
-                </span>
-              </div>
-            </button>
+
+              {/* Explicit Logout Button */}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/50 border border-slate-800 hover:border-rose-500/50 text-slate-400 hover:text-rose-400 transition"
+                  title="Hisobdan chiqish (Logout)"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
             {/* Prop Account Switcher Pill */}
             <button

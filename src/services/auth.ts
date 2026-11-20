@@ -55,7 +55,7 @@ export const saveUsers = (users: AppUser[]): void => {
 
 export const getActiveUser = (): AppUser | null => {
   try {
-    const raw = localStorage.getItem(ACTIVE_USER_STORAGE_KEY);
+    const raw = sessionStorage.getItem(ACTIVE_USER_STORAGE_KEY);
     if (!raw) return null;
     const user = JSON.parse(raw) as AppUser;
     return user;
@@ -67,8 +67,10 @@ export const getActiveUser = (): AppUser | null => {
 export const setActiveUserSession = (user: AppUser | null): void => {
   try {
     if (user) {
+      sessionStorage.setItem(ACTIVE_USER_STORAGE_KEY, JSON.stringify(user));
       localStorage.setItem(ACTIVE_USER_STORAGE_KEY, JSON.stringify(user));
     } else {
+      sessionStorage.removeItem(ACTIVE_USER_STORAGE_KEY);
       localStorage.removeItem(ACTIVE_USER_STORAGE_KEY);
     }
   } catch (e) {

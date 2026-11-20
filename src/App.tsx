@@ -33,6 +33,7 @@ import { AppUser } from './types/journal';
 import { getActiveUser, logoutUser, DEFAULT_USERS } from './services/auth';
 import { getUserFilteredAccounts } from './services/storage';
 import { LoginModal } from './components/LoginModal';
+import { LoginPage } from './components/LoginPage';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'tradify' | 'notion' | 'checklist' | 'analytics'>('tradify');
@@ -269,9 +270,14 @@ export function App() {
   const handleLogout = () => {
     logoutUser();
     setCurrentUser(null);
-    setIsLoginModalOpen(true);
+    setIsLoginModalOpen(false);
     showToast('Tizimdan chiqildi');
   };
+
+  // Agar foydalanuvchi tizimga kirmagan bo'lsa, to'g'ridan-to'g'ri Login sahifasini ko'rsatamiz
+  if (!currentUser) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-300">
