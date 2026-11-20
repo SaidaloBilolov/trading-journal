@@ -12,7 +12,8 @@ import {
   Calendar,
   FileText,
   Building2,
-  ChevronDown
+  ChevronDown,
+  FlaskConical
 } from 'lucide-react';
 import { UserSettings, PropAccount } from '../types/journal';
 
@@ -26,6 +27,7 @@ interface HeaderProps {
   isSupabaseConnected: boolean;
   activeAccount?: PropAccount;
   accounts: PropAccount[];
+  onSelectAccount?: (id: string) => void;
   onOpenPropModal: () => void;
   onOpenNewTrade: () => void;
   onOpenSettings: () => void;
@@ -43,6 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
   isSupabaseConnected,
   activeAccount,
   accounts,
+  onSelectAccount,
   onOpenPropModal,
   onOpenNewTrade,
   onOpenSettings,
@@ -284,6 +287,25 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <BarChart3 className="w-4 h-4" />
             <span>Statistika & 2K Drawdown</span>
+          </button>
+
+          {/* Dedicated Backtest Notion Tab */}
+          <button
+            onClick={() => {
+              const backtestAcc = accounts.find((a) => a.firm === 'Backtest' || a.id === 'acc-backtest');
+              if (backtestAcc && onSelectAccount) {
+                onSelectAccount(backtestAcc.id);
+              }
+              setActiveTab('notion');
+            }}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+              activeAccount?.firm === 'Backtest' && activeTab === 'notion'
+                ? 'bg-purple-600/25 text-purple-300 border-purple-500/60 shadow-lg shadow-purple-950 ring-1 ring-purple-500/50'
+                : 'text-purple-400 border-purple-800/50 hover:bg-purple-950/40 hover:border-purple-600'
+            }`}
+          >
+            <FlaskConical className="w-4 h-4 text-purple-400" />
+            <span>🔬 Backtest Jurnali (Notion)</span>
           </button>
         </div>
 

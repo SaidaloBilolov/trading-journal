@@ -11,7 +11,8 @@ import {
   TrendingUp, 
   ArrowRight,
   Building2,
-  CheckCircle2
+  CheckCircle2,
+  FlaskConical
 } from 'lucide-react';
 import { PropAccount, Trade } from '../types/journal';
 
@@ -27,6 +28,7 @@ interface PropAccountModalProps {
 }
 
 const FIRM_OPTIONS = [
+  'Backtest',
   'Tradify',
   'Apex Trader Funding',
   'Topstep',
@@ -122,13 +124,38 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                 <Briefcase className="w-4 h-4 text-cyan-400" /> Mavjud Prop Hisoblar
               </span>
               {!showAddForm && (
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(true)}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-cyan-500/20"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Yangi Prop Hisob
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setName('Backtest (FxReplay)');
+                      setFirm('Backtest');
+                      setInitialBalance(50000);
+                      setTrailingDrawdown(2000);
+                      setDescription('FxReplay / TradingView tarixiy sinov Notion jurnali');
+                      setShowAddForm(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900/90 text-purple-200 border border-purple-500/50 text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                  >
+                    <FlaskConical className="w-3.5 h-3.5 text-purple-400" />
+                    <span>+ Yangi Backtest</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setName('');
+                      setFirm('Apex Trader Funding');
+                      setInitialBalance(50000);
+                      setTrailingDrawdown(2000);
+                      setDescription('');
+                      setShowAddForm(true);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-cyan-500/20"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Yangi Prop Hisob
+                  </button>
+                </div>
               )}
             </div>
 
@@ -149,20 +176,32 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                     onClick={() => onSelectAccount(acc.id)}
                     className={`p-4 rounded-xl border transition cursor-pointer relative ${
                       isActive
-                        ? 'bg-cyan-950/30 border-cyan-500/60 shadow-lg shadow-cyan-500/10'
+                        ? acc.firm === 'Backtest'
+                          ? 'bg-purple-950/30 border-purple-500/70 shadow-lg shadow-purple-950/40'
+                          : 'bg-cyan-950/30 border-cyan-500/60 shadow-lg shadow-cyan-500/10'
                         : 'bg-slate-950/50 border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
                     }`}
                   >
                     {isActive && (
-                      <span className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                        <CheckCircle2 className="w-3 h-3 text-cyan-400" /> Faol
+                      <span className={`absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                        acc.firm === 'Backtest'
+                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                          : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                      }`}>
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Faol
                       </span>
                     )}
 
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-medium">
-                        {acc.firm}
-                      </span>
+                      {acc.firm === 'Backtest' ? (
+                        <span className="text-[11px] px-2 py-0.5 rounded-lg bg-purple-950 text-purple-300 border border-purple-700/60 font-mono font-bold flex items-center gap-1">
+                          <FlaskConical className="w-3 h-3 text-purple-400" /> Backtest Notion Jurnali
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-medium">
+                          {acc.firm}
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="font-bold text-white text-base truncate">{acc.name}</h3>

@@ -257,6 +257,7 @@ export function App() {
         isSupabaseConnected={isSupabaseConnected}
         activeAccount={activeAccount}
         accounts={accounts}
+        onSelectAccount={handleSelectAccount}
         onOpenPropModal={() => setIsPropModalOpen(true)}
         onOpenNewTrade={handleOpenNewTrade}
         onOpenSettings={() => setIsSettingsModalOpen(true)}

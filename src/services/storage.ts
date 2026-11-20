@@ -21,6 +21,18 @@ export const DEFAULT_PROP_ACCOUNTS: PropAccount[] = [
     is_active: true,
     description: 'Tradovate MNQ / MGC mikro sdelkalar hisobi',
   },
+  {
+    id: 'acc-backtest',
+    name: 'Backtest (FxReplay / Sim)',
+    firm: 'Backtest',
+    initial_balance: 50000,
+    trailing_drawdown_amount: 2000,
+    daily_loss_limit: 1000,
+    max_contracts: 5,
+    created_at: '2026-10-01T00:00:00Z',
+    is_active: false,
+    description: 'Tarixiy testlar, FxReplay va strategiya backtest Notion jurnali',
+  },
 ];
 
 // Helper: Prop Accounts
@@ -31,8 +43,19 @@ export const getLocalPropAccounts = (): PropAccount[] => {
       localStorage.setItem(PROP_ACCOUNTS_STORAGE_KEY, JSON.stringify(DEFAULT_PROP_ACCOUNTS));
       return DEFAULT_PROP_ACCOUNTS;
     }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_PROP_ACCOUNTS;
+    const parsed: PropAccount[] = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return DEFAULT_PROP_ACCOUNTS;
+    }
+    // Ensure default Backtest account exists in the list
+    if (!parsed.some((a) => a.id === 'acc-backtest' || a.firm === 'Backtest')) {
+      const backtestAcc = DEFAULT_PROP_ACCOUNTS.find((a) => a.id === 'acc-backtest');
+      if (backtestAcc) {
+        parsed.push(backtestAcc);
+        localStorage.setItem(PROP_ACCOUNTS_STORAGE_KEY, JSON.stringify(parsed));
+      }
+    }
+    return parsed;
   } catch (e) {
     console.error('Lokal prop hisoblarni o‘qishda xatolik:', e);
     return DEFAULT_PROP_ACCOUNTS;
