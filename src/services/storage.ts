@@ -35,9 +35,56 @@ export const DEFAULT_PROP_ACCOUNTS: PropAccount[] = [
     max_contracts: 5,
     created_at: '2026-10-01T00:00:00Z',
     is_active: false,
-    description: 'Tarixiy testlar, FxReplay va strategiya backtest Notion jurnali',
+    description: 'owner:said | Tarixiy testlar, FxReplay va strategiya backtest Notion jurnali',
   },
 ];
+
+export const SHAXZOD_DEFAULT_ACCOUNTS: PropAccount[] = [
+  {
+    id: 'acc-shaxzod-prop',
+    name: 'Shaxzod Prop 50K',
+    firm: 'Tradify',
+    market_type: 'futures',
+    drawdown_type: 'trailing',
+    initial_balance: 50000,
+    trailing_drawdown_amount: 2000,
+    daily_loss_limit: 1000,
+    max_contracts: 5,
+    created_at: '2026-11-20T00:00:00Z',
+    is_active: true,
+    description: 'owner:shaxzod | Shaxzodning prop hisobi',
+  },
+  {
+    id: 'acc-shaxzod-backtest',
+    name: 'Shaxzod Backtest',
+    firm: 'Backtest',
+    market_type: 'backtest',
+    drawdown_type: 'trailing',
+    initial_balance: 50000,
+    trailing_drawdown_amount: 2000,
+    daily_loss_limit: 1000,
+    max_contracts: 5,
+    created_at: '2026-11-20T00:00:00Z',
+    is_active: false,
+    description: 'owner:shaxzod | Shaxzodning tarixiy testlar Notion jurnali',
+  },
+];
+
+export const getUserFilteredAccounts = (allAccounts: PropAccount[], username: string): PropAccount[] => {
+  const cleanUser = (username || 'said').toLowerCase();
+  if (cleanUser === 'shaxzod') {
+    const shaxzodAccs = allAccounts.filter(
+      (a) => (a.description && a.description.includes('owner:shaxzod')) || a.id.includes('shaxzod')
+    );
+    if (shaxzodAccs.length > 0) return shaxzodAccs;
+    return SHAXZOD_DEFAULT_ACCOUNTS;
+  }
+
+  // Saida'lo (Said) accounts
+  return allAccounts.filter(
+    (a) => !a.id.includes('shaxzod') && (!a.description || !a.description.includes('owner:shaxzod'))
+  );
+};
 
 // Helper: Prop Accounts
 export const getLocalPropAccounts = (): PropAccount[] => {

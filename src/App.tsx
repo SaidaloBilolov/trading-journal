@@ -29,6 +29,10 @@ import {
 import { exportTradesToExcel } from './utils/excelExport';
 import { exportTradesToPDF } from './utils/pdfExport';
 import { Download, FileText, Check } from 'lucide-react';
+import { AppUser } from './types/journal';
+import { getActiveUser, logoutUser, DEFAULT_USERS } from './services/auth';
+import { getUserFilteredAccounts } from './services/storage';
+import { LoginModal } from './components/LoginModal';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'tradify' | 'notion' | 'checklist' | 'analytics'>('tradify');
@@ -36,6 +40,10 @@ export function App() {
   const [settings, setSettings] = useState<UserSettings>(getLocalSettings());
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(getLocalChecklistItems());
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
+
+  // Auth state
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => getActiveUser());
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Prop Accounts state
   const [accounts, setAccounts] = useState<PropAccount[]>(getLocalPropAccounts());
@@ -71,11 +79,16 @@ export function App() {
     loadData();
   }, []);
 
+  // Visible Prop Accounts for current user
+  const visibleAccounts = useMemo(() => {
+    return getUserFilteredAccounts(accounts, currentUser?.username || 'said');
+  }, [accounts, currentUser]);
+
   // Active Prop Account
   const activeAccount = useMemo(() => {
-    return accounts.find((a) => a.id === activeAccountId) || accounts[0] || {
-      id: 'acc-tradify',
-      name: 'Tradify 50K',
+    return visibleAccounts.find((a) => a.id === activeAccountId) || visibleAccounts[0] || {
+      id: currentUser?.username === 'shaxzod' ? 'acc-shaxzod-prop' : 'acc-tradify',
+      name: currentUser?.username === 'shaxzod' ? 'Shaxzod Prop 50K' : 'Tradify 50K',
       firm: 'Tradify',
       initial_balance: 50000,
       trailing_drawdown_amount: 2000,
@@ -83,7 +96,7 @@ export function App() {
       max_contracts: 5,
       created_at: new Date().toISOString(),
     };
-  }, [accounts, activeAccountId]);
+  }, [visibleAccounts, activeAccountId, currentUser]);
 
   // Active Account Trades (Filter only trades of this account)
   const activeTrades = useMemo(() => {
@@ -242,6 +255,24 @@ export function App() {
     window.location.reload();
   };
 
+  const handleLoginSuccess = (user: AppUser) => {
+    setCurrentUser(user);
+    setIsLoginModalOpen(false);
+    const userAccs = getUserFilteredAccounts(accounts, user.username);
+    if (userAccs.length > 0) {
+      setActiveAccountIdState(userAccs[0].id);
+      setActiveAccountId(userAccs[0].id);
+    }
+    showToast(`Xush kelibsiz, ${user.name}!`);
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    setIsLoginModalOpen(true);
+    showToast('Tizimdan chiqildi');
+  };
+
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col font-sans selection:bg-emerald-500/20 selection:text-emerald-300">
       
@@ -263,11 +294,14 @@ export function App() {
         settings={settings}
         isSupabaseConnected={isSupabaseConnected}
         activeAccount={activeAccount}
-        accounts={accounts}
+        accounts={visibleAccounts}
+        currentUser={currentUser}
         onSelectAccount={handleSelectAccount}
         onOpenPropModal={() => setIsPropModalOpen(true)}
         onOpenNewTrade={handleOpenNewTrade}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
+        onLogout={handleLogout}
         onExportExcel={handleExportExcel}
         onExportPDF={handleExportPDF}
       />
@@ -402,7 +436,7 @@ export function App() {
         onClose={() => setIsNewTradeModalOpen(false)}
         onSave={handleSaveTrade}
         editTrade={editingTrade}
-        accounts={accounts}
+        accounts={visibleAccounts}
         activeAccountId={activeAccountId}
         prefillChecklistScore={prefillChecklistScore}
         prefillChecklistTotal={prefillChecklistTotal}
@@ -413,8 +447,9 @@ export function App() {
       <PropAccountModal
         isOpen={isPropModalOpen}
         onClose={() => setIsPropModalOpen(false)}
-        accounts={accounts}
+        accounts={visibleAccounts}
         activeAccountId={activeAccountId}
+        currentUser={currentUser}
         onSelectAccount={handleSelectAccount}
         onAddAccount={handleAddAccount}
         onDeleteAccount={handleDeleteAccount}
@@ -430,6 +465,13 @@ export function App() {
         onSaveSettings={handleSaveSettings}
         onSaveChecklistItems={handleSaveChecklistItems}
         onResetDemo={handleResetDemo}
+      />
+
+      {/* Login & User Auth Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen || !currentUser}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSuccess={handleLoginSuccess}
       />
 
       {/* Footer in Uzbek */}

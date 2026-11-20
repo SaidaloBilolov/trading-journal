@@ -14,7 +14,7 @@ import {
   CheckCircle2,
   FlaskConical
 } from 'lucide-react';
-import { PropAccount, Trade } from '../types/journal';
+import { PropAccount, Trade, AppUser } from '../types/journal';
 
 interface PropAccountModalProps {
   isOpen: boolean;
@@ -25,6 +25,7 @@ interface PropAccountModalProps {
   onAddAccount: (account: PropAccount) => void;
   onDeleteAccount: (id: string) => void;
   allTrades: Trade[];
+  currentUser?: AppUser | null;
 }
 
 const FOREX_FIRMS = [
@@ -69,6 +70,7 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
   onAddAccount,
   onDeleteAccount,
   allTrades,
+  currentUser,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [marketType, setMarketType] = useState<'futures' | 'forex' | 'backtest'>('futures');
@@ -133,6 +135,9 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
+    const ownerTag = `owner:${currentUser?.username || 'said'}`;
+    const fullDesc = description.trim() ? `${ownerTag} | ${description.trim()}` : ownerTag;
+
     const newAcc: PropAccount = {
       id: `acc-${Date.now()}`,
       name: name.trim(),
@@ -145,7 +150,7 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
       max_contracts: Number(maxContracts) || 5,
       created_at: new Date().toISOString(),
       is_active: false,
-      description: description.trim(),
+      description: fullDesc,
     };
 
     onAddAccount(newAcc);

@@ -13,9 +13,11 @@ import {
   FileText,
   Building2,
   ChevronDown,
-  FlaskConical
+  FlaskConical,
+  User,
+  LogOut
 } from 'lucide-react';
-import { UserSettings, PropAccount } from '../types/journal';
+import { UserSettings, PropAccount, AppUser } from '../types/journal';
 
 interface HeaderProps {
   activeTab: 'checklist' | 'notion' | 'tradify' | 'analytics';
@@ -27,10 +29,13 @@ interface HeaderProps {
   isSupabaseConnected: boolean;
   activeAccount?: PropAccount;
   accounts: PropAccount[];
+  currentUser?: AppUser | null;
   onSelectAccount?: (id: string) => void;
   onOpenPropModal: () => void;
   onOpenNewTrade: () => void;
   onOpenSettings: () => void;
+  onOpenLogin: () => void;
+  onLogout?: () => void;
   onExportExcel: () => void;
   onExportPDF: () => void;
 }
@@ -45,10 +50,13 @@ export const Header: React.FC<HeaderProps> = ({
   isSupabaseConnected,
   activeAccount,
   accounts,
+  currentUser,
   onSelectAccount,
   onOpenPropModal,
   onOpenNewTrade,
   onOpenSettings,
+  onOpenLogin,
+  onLogout,
   onExportExcel,
   onExportPDF,
 }) => {
@@ -96,6 +104,13 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile quick actions */}
             <div className="flex items-center space-x-2 lg:hidden">
               <button
+                onClick={onOpenLogin}
+                className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400 hover:text-white"
+                title="Profil va Foydalanuvchi"
+              >
+                <User className="w-4 h-4" />
+              </button>
+              <button
                 onClick={onOpenSettings}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
                 title="Sozlamalar"
@@ -114,6 +129,34 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Quick Balance & Drawdown Buffer Monitor */}
           <div className="flex items-center gap-3 overflow-x-auto py-1">
+            {/* Active User Profile Pill */}
+            <button
+              onClick={onOpenLogin}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl border transition shadow-sm text-left shrink-0 ${
+                currentUser?.username === 'shaxzod'
+                  ? 'bg-cyan-950/40 hover:bg-cyan-900/60 border-cyan-500/50 text-cyan-200'
+                  : 'bg-emerald-950/30 hover:bg-emerald-900/50 border-emerald-500/40 text-emerald-200'
+              }`}
+              title="Profilni almashtirish yoki chiqish"
+            >
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] ${
+                currentUser?.username === 'shaxzod'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+              }`}>
+                {currentUser?.avatar || 'SB'}
+              </div>
+              <div>
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 block font-semibold leading-none">
+                  Treydir
+                </span>
+                <span className="text-xs font-bold text-white flex items-center gap-1 leading-tight mt-0.5">
+                  {currentUser?.name || "Saida'lo (Said)"}
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                </span>
+              </div>
+            </button>
+
             {/* Prop Account Switcher Pill */}
             <button
               onClick={onOpenPropModal}

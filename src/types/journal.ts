@@ -111,3 +111,14 @@ export interface DailySummary {
   win_count: number;
   loss_count: number;
 }
+
+export interface AppUser {
+  id: string;
+  username: string;
+  name: string;
+  password: string;
+  role: 'admin' | 'trader';
+  avatar?: string;
+  default_account_id?: string;
+  created_at?: string;
+}
