@@ -435,7 +435,7 @@ export function App() {
       {/* Footer in Uzbek */}
       <footer className="border-t border-slate-900 bg-[#070b14] py-6 mt-12 text-xs text-slate-500 text-center">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Tradify & Notion Trading Journal. {activeAccount.name} bo‘yicha {activeTrades.length} ta sdelka va Trailing Drawdown himoyasi.</p>
+          <p>© 2026 Trading Journal By Said. {activeAccount.name} bo‘yicha {activeTrades.length} ta sdelka va risk nazorati.</p>
           <div className="flex items-center gap-4">
             <button onClick={handleExportExcel} className="hover:text-emerald-400 flex items-center gap-1">
               <Download className="w-3.5 h-3.5" /> Excel (.xlsx)

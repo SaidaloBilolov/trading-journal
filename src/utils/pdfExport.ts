@@ -88,7 +88,7 @@ export const exportTradesToPDF = (
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('SAVDO JURNALI VA INTIZOM HISOBOTI (TRADIFY & NOTION)', 36, 28);
+  doc.text('SAVDO JURNALI VA INTIZOM HISOBOTI (BY SAID)', 36, 28);
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');

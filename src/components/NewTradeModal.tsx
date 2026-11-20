@@ -407,7 +407,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Notion jurnali va Tradify hisoboti uchun barcha maydonlar va strategiya galochkalari
+                Savdo jurnali va umumiy hisobot uchun barcha maydonlar va strategiya shartlari
               </p>
             </div>
           </div>

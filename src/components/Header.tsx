@@ -84,11 +84,11 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                    TRADIFY & NOTION JOURNAL <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-semibold">PRO</span>
+                    Trading Journal By Said <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-mono font-semibold">PRO</span>
                   </h1>
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium">
-                  Futures Savdo Jurnali • <span className="text-emerald-400 font-semibold font-mono">116 ta Tradovate Sdelkalari</span>
+                  Professional Savdo Jurnali • <span className="text-emerald-400 font-semibold font-mono">116 ta Sdelkalar</span>
                 </p>
               </div>
             </div>
@@ -255,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>Tradify & Kalendar (P&L)</span>
+            <span>Kalendar & Natijalar (P&L)</span>
           </button>
 
           <button
