@@ -42,6 +42,26 @@ interface NewTradeModalProps {
   prefillSessionSweep?: boolean;
 }
 
+export const POPULAR_INSTRUMENTS = [
+  { symbol: 'MNQZ6', name: 'MNQZ6 (Nasdaq Micro Futures)' },
+  { symbol: 'MNQ', name: 'MNQ (Nasdaq 100 Micro)' },
+  { symbol: 'NQ', name: 'NQ (Nasdaq 100 E-mini)' },
+  { symbol: 'NAS100', name: 'NAS100 (Nasdaq 100 Index)' },
+  { symbol: 'MESZ6', name: 'MESZ6 (SPX 500 Micro Futures)' },
+  { symbol: 'MES', name: 'MES (SPX 500 Micro)' },
+  { symbol: 'ES', name: 'ES (SPX 500 E-mini)' },
+  { symbol: 'SPX500', name: 'SPX 500 (S&P 500 Index)' },
+  { symbol: 'MGCZ6', name: 'MGCZ6 (Gold Micro Futures)' },
+  { symbol: 'MGC', name: 'MGC (Gold Micro)' },
+  { symbol: 'GC', name: 'GC (Gold Futures)' },
+  { symbol: 'XAU/USD', name: 'XAU/USD (Gold Spot)' },
+  { symbol: 'MYM', name: 'MYM (Dow Jones Micro)' },
+  { symbol: 'YM', name: 'YM (Dow Jones E-mini)' },
+  { symbol: 'M2K', name: 'M2K (Russell 2000 Micro)' },
+  { symbol: 'CL', name: 'CL (Crude Oil / Neft)' },
+  { symbol: 'CUSTOM', name: '✏️ Boshqa instrument (qo‘lda yozish)' },
+];
+
 export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   isOpen,
   onClose,
@@ -62,6 +82,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   // Order Name
   const [orderName, setOrderName] = useState('Order');
   const [instrument, setInstrument] = useState('MNQZ6');
+  const [isCustomInstrument, setIsCustomInstrument] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState(
     new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false })
@@ -447,17 +468,76 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-medium mb-1">
-                      Пара (Instrument) <span className="text-emerald-400">*</span>
+                    <label className="block text-slate-300 font-medium mb-1 flex items-center justify-between">
+                      <span>Пара (Instrument) <span className="text-emerald-400">*</span></span>
+                      {instrument && (
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                          {instrument}
+                        </span>
+                      )}
                     </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="MNQZ6, NAS100, MGC, MES..."
-                      value={instrument}
-                      onChange={(e) => setInstrument(e.target.value.toUpperCase())}
-                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
-                    />
+
+                    {/* Instrument Selector Dropdown */}
+                    <select
+                      value={
+                        POPULAR_INSTRUMENTS.some((i) => i.symbol === instrument)
+                          ? instrument
+                          : 'CUSTOM'
+                      }
+                      onChange={(e) => {
+                        if (e.target.value !== 'CUSTOM') {
+                          setInstrument(e.target.value);
+                          setIsCustomInstrument(false);
+                        } else {
+                          setIsCustomInstrument(true);
+                        }
+                      }}
+                      className="w-full bg-[#131b2e] border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-emerald-500 font-medium"
+                    >
+                      {POPULAR_INSTRUMENTS.map((inst) => (
+                        <option key={inst.symbol} value={inst.symbol}>
+                          {inst.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Custom input if "CUSTOM" or custom ticker entered */}
+                    {(isCustomInstrument || !POPULAR_INSTRUMENTS.some((i) => i.symbol === instrument)) && (
+                      <input
+                        type="text"
+                        required
+                        placeholder="Katirovkani kiriting: masalan MNQH7, SILVER..."
+                        value={instrument}
+                        onChange={(e) => setInstrument(e.target.value.toUpperCase())}
+                        className="w-full mt-1.5 bg-[#131b2e] border border-cyan-500/60 rounded-xl px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-cyan-400 animate-in fade-in duration-100"
+                      />
+                    )}
+
+                    {/* Quick Select Badges */}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {[
+                        { s: 'MNQZ6', l: 'MNQ (Nasdaq)' },
+                        { s: 'MESZ6', l: 'MES (SPX 500)' },
+                        { s: 'MGCZ6', l: 'MGC (Gold)' },
+                        { s: 'XAU/USD', l: 'XAU (Gold)' },
+                      ].map((item) => (
+                        <button
+                          key={item.s}
+                          type="button"
+                          onClick={() => {
+                            setInstrument(item.s);
+                            setIsCustomInstrument(false);
+                          }}
+                          className={`text-[9.5px] font-mono px-2 py-0.5 rounded-lg border transition ${
+                            instrument === item.s
+                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
+                              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {item.l}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div>
