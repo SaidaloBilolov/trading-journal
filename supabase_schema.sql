@@ -119,11 +119,16 @@ VALUES
   ('risk-and-shield', 'Risk va Kunlik Qalqon', '1 mikro kontrakt, maksimal risk ~$40-$45, limit buzilmaganmi?', false, true, 5)
 ON CONFLICT (id) DO NOTHING;
 
--- 5. Row Level Security (RLS) xavfsizlik qoidalari
+-- 5. Row Level Security (RLS) va Ruxsatlar (Grants)
 ALTER TABLE public.sdelkalar ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.prop_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sozlamalar ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tekshiruv_shartlari ENABLE ROW LEVEL SECURITY;
+
+GRANT ALL ON public.sdelkalar TO anon, authenticated, service_role;
+GRANT ALL ON public.prop_accounts TO anon, authenticated, service_role;
+GRANT ALL ON public.sozlamalar TO anon, authenticated, service_role;
+GRANT ALL ON public.tekshiruv_shartlari TO anon, authenticated, service_role;
 
 CREATE POLICY "Barchaga sdelkalarni o‘qish va yozish ruxsati" ON public.sdelkalar FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Barchaga prop hisoblarni o‘qish va yozish ruxsati" ON public.prop_accounts FOR ALL USING (true) WITH CHECK (true);
