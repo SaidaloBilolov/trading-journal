@@ -41,11 +41,14 @@ export const exportTradesToPDF = (
   const largestWin = wins.length > 0 ? Math.max(...wins.map((t) => t.net_pnl)) : 0;
   const largestLoss = losses.length > 0 ? Math.min(...losses.map((t) => t.net_pnl)) : 0;
 
-  // Peak balance & Trailing Drawdown calculation
+  // Peak balance & Min balance calculation
   let running = initialBalance;
   let peakBalance = initialBalance;
+  let minBalance = initialBalance;
+  let maxIdx = 0;
+  let minIdx = 0;
   const chronologicalTrades = [...trades].sort(
-    (a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime()
+    (a, b) => new Date(`${a.date}T${a.time || '12:00'}`).getTime() - new Date(`${b.date}T${b.time || '12:00'}`).getTime()
   );
 
   const balancePoints: { xIdx: number; balance: number; trailingDd: number; pnl: number }[] = [
@@ -56,6 +59,11 @@ export const exportTradesToPDF = (
     running += t.net_pnl;
     if (running > peakBalance) {
       peakBalance = running;
+      maxIdx = i + 1;
+    }
+    if (running < minBalance) {
+      minBalance = running;
+      minIdx = i + 1;
     }
     const currentTrailingDd = peakBalance - trailingDrawdownAmount;
     balancePoints.push({
@@ -98,9 +106,11 @@ export const exportTradesToPDF = (
   doc.setFont('helvetica', 'bold');
   doc.text('JONLI HISOBOT', pageWidth - 128, 36);
 
-  // 2. Summary KPI Cards Grid (2 rows)
-  const kpiTop = 80;
-  const cardWidth = (pageWidth - 72 - 30) / 4; // 4 columns
+  // 2. Summary KPI Cards Grid (2 rows x 5 columns = 10 cards)
+  const kpiTop = 78;
+  const colCount = 5;
+  const gap = 8;
+  const cardWidth = (pageWidth - 72 - (colCount - 1) * gap) / colCount; // ~147.5 pt
   const cardHeight = 44;
 
   const drawKpiCard = (x: number, y: number, label: string, val: string, sub: string, valColor: number[]) => {
@@ -112,50 +122,59 @@ export const exportTradesToPDF = (
     doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 116, 139);
-    doc.text(label, x + 8, y + 13);
+    doc.text(label, x + 7, y + 13);
 
-    doc.setFontSize(11);
+    doc.setFontSize(10.5);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(valColor[0], valColor[1], valColor[2]);
-    doc.text(val, x + 8, y + 28);
+    doc.text(val, x + 7, y + 27);
 
-    doc.setFontSize(7);
+    doc.setFontSize(6.8);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(148, 163, 184);
-    doc.text(sub, x + 8, y + 38);
+    doc.text(sub, x + 7, y + 37);
   };
 
-  // Row 1
+  // Row 1 (5 Cards: Boshlang'ich, Joriy, Maksimal Pik, Minimal Past, Sof P&L)
   drawKpiCard(36, kpiTop, 'Boshlang‘ich Balans', `$${initialBalance.toLocaleString()}`, `${accountName}`, [15, 23, 42]);
-  drawKpiCard(36 + cardWidth + 10, kpiTop, 'Joriy Balans', `$${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, `Pik: $${peakBalance.toFixed(2)}`, [15, 23, 42]);
+  drawKpiCard(36 + (cardWidth + gap) * 1, kpiTop, 'Joriy Balans', `$${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, `${totalTrades} ta sdelka`, [15, 23, 42]);
   drawKpiCard(
-    36 + (cardWidth + 10) * 2, 
+    36 + (cardWidth + gap) * 2, 
+    kpiTop, 
+    'Maksimal Balans (Peak)', 
+    `$${peakBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+    `Cho‘qqi: +$${(peakBalance - initialBalance).toFixed(2)}`, 
+    [16, 185, 129]
+  );
+  drawKpiCard(
+    36 + (cardWidth + gap) * 3, 
+    kpiTop, 
+    'Minimal Balans (Eng Past)', 
+    `$${minBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+    `Past: ${minBalance - initialBalance >= 0 ? '+' : ''}$${(minBalance - initialBalance).toFixed(2)}`, 
+    minBalance < initialBalance ? [244, 63, 94] : [15, 23, 42]
+  );
+  drawKpiCard(
+    36 + (cardWidth + gap) * 4, 
     kpiTop, 
     'Sof Foyda / Zarar', 
     `${totalNetPnl >= 0 ? '+' : ''}$${totalNetPnl.toFixed(2)}`, 
     `Daromad: ${Number(profitPercentage) >= 0 ? '+' : ''}${profitPercentage}%`, 
     totalNetPnl >= 0 ? [16, 185, 129] : [244, 63, 94]
   );
-  drawKpiCard(
-    36 + (cardWidth + 10) * 3, 
-    kpiTop, 
-    'Yutuq Foizi (Win Rate)', 
-    `${winRate}%`, 
-    `${wins.length}W / ${losses.length}L`, 
-    [15, 23, 42]
-  );
 
-  // Row 2
-  const kpiRow2 = kpiTop + cardHeight + 8;
-  drawKpiCard(36, kpiRow2, 'Profit Factor', `${profitFactor}`, `Kutilma: +$${expectancy}`, [16, 185, 129]);
-  drawKpiCard(36 + cardWidth + 10, kpiRow2, 'Eng Katta Yutuq', `+$${largestWin.toFixed(2)}`, `O‘rtacha: +$${avgWin}`, [16, 185, 129]);
-  drawKpiCard(36 + (cardWidth + 10) * 2, kpiRow2, 'Eng Katta Zarar', `-$${Math.abs(largestLoss).toFixed(2)}`, `O‘rtacha: -$${avgLoss}`, [244, 63, 94]);
+  // Row 2 (5 Cards: Win Rate, Profit Factor, Eng Katta Win, Eng Katta Loss, DD Buffer)
+  const kpiRow2 = kpiTop + cardHeight + 7;
+  drawKpiCard(36, kpiRow2, 'Yutuq Foizi (Win Rate)', `${winRate}%`, `${wins.length}W / ${losses.length}L`, [15, 23, 42]);
+  drawKpiCard(36 + (cardWidth + gap) * 1, kpiRow2, 'Profit Factor', `${profitFactor}`, `Kutilma: +$${expectancy}`, [16, 185, 129]);
+  drawKpiCard(36 + (cardWidth + gap) * 2, kpiRow2, 'Eng Katta Yutuq', `+$${largestWin.toFixed(2)}`, `O‘rtacha: +$${avgWin}`, [16, 185, 129]);
+  drawKpiCard(36 + (cardWidth + gap) * 3, kpiRow2, 'Eng Katta Zarar', `-$${Math.abs(largestLoss).toFixed(2)}`, `O‘rtacha: -$${avgLoss}`, [244, 63, 94]);
   drawKpiCard(
-    36 + (cardWidth + 10) * 3, 
+    36 + (cardWidth + gap) * 4, 
     kpiRow2, 
-    'Trailing Drawdown Buferi', 
+    'Trailing DD Buferi', 
     `$${bufferRemaining.toFixed(2)}`, 
-    `Sliv chegarasi: $${trailingLimit.toFixed(2)}`, 
+    `Sliv: $${trailingLimit.toFixed(2)}`, 
     bufferRemaining > 1000 ? [16, 185, 129] : [244, 63, 94]
   );
 
@@ -281,20 +300,28 @@ export const exportTradesToPDF = (
   doc.setFillColor(16, 185, 129); // green
   doc.circle(endX, endY, 3.5, 'F');
 
-  // Peak Milestone Dot
-  let maxIdx = 0;
-  let maxB = initialBalance;
-  balancePoints.forEach((p, idx) => {
-    if (p.balance > maxB) {
-      maxB = p.balance;
-      maxIdx = idx;
-    }
-  });
-  if (maxIdx > 0 && maxIdx < balancePoints.length - 1) {
+  // Peak Milestone Dot & Label (Maksimal Balans)
+  if (maxIdx > 0 && maxIdx < balancePoints.length) {
     const peakX = getXCoord(maxIdx);
-    const peakY = getYCoord(maxB);
+    const peakY = getYCoord(peakBalance);
     doc.setFillColor(251, 191, 36); // amber
     doc.circle(peakX, peakY, 3.5, 'F');
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(251, 191, 36);
+    doc.text(`Pik: $${Math.round(peakBalance).toLocaleString()}`, Math.max(peakX - 16, plotLeft + 4), Math.max(peakY - 5, plotTop + 10));
+  }
+
+  // Min Milestone Dot & Label (Minimal Balans)
+  if (minIdx > 0 && minIdx < balancePoints.length && minIdx !== maxIdx) {
+    const minX = getXCoord(minIdx);
+    const minY = getYCoord(minBalance);
+    doc.setFillColor(168, 85, 247); // purple
+    doc.circle(minX, minY, 3.5, 'F');
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(168, 85, 247);
+    doc.text(`Min: $${Math.round(minBalance).toLocaleString()}`, Math.max(minX - 16, plotLeft + 4), Math.min(minY + 9, plotBottom - 4));
   }
 
   // Bottom Timeline Labels
