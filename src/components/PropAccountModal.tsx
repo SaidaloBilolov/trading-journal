@@ -485,32 +485,6 @@ export const PropAccountModal: React.FC<PropAccountModalProps> = ({
                     />
                   </div>
 
-                  {/* Kunlik Zarar Limiti */}
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                      Kunlik Zarar Limiti ($)
-                    </label>
-                    <input
-                      type="number"
-                      value={dailyLossLimit}
-                      onChange={(e) => setDailyLossLimit(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-cyan-500"
-                    />
-                  </div>
-
-                  {/* Maksimal Mikro Kontraktlar */}
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                      Maksimal Mikro Kontraktlar
-                    </label>
-                    <input
-                      type="number"
-                      value={maxContracts}
-                      onChange={(e) => setMaxContracts(Number(e.target.value))}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-cyan-500"
-                    />
-                  </div>
-
                 </div>
 
                 {/* Izoh */}

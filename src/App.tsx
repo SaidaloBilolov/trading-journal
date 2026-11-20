@@ -49,9 +49,9 @@ export function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   // Prefill state from checklist
-  const [prefillChecklistScore, setPrefillChecklistScore] = useState(5);
-  const [prefillChecklistTotal, setPrefillChecklistTotal] = useState(5);
-  const [prefillSessionSweep, setPrefillSessionSweep] = useState(true);
+  const [prefillChecklistScore, setPrefillChecklistScore] = useState(0);
+  const [prefillChecklistTotal, setPrefillChecklistTotal] = useState(7);
+  const [prefillSessionSweep, setPrefillSessionSweep] = useState(false);
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -164,9 +164,9 @@ export function App() {
 
   const handleOpenNewTrade = () => {
     setEditingTrade(null);
-    setPrefillChecklistScore(5);
-    setPrefillChecklistTotal(5);
-    setPrefillSessionSweep(true);
+    setPrefillChecklistScore(0);
+    setPrefillChecklistTotal(7);
+    setPrefillSessionSweep(false);
     setIsNewTradeModalOpen(true);
   };
 

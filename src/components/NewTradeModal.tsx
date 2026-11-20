@@ -80,9 +80,9 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   editTrade,
   accounts,
   activeAccountId,
-  prefillChecklistScore = 5,
-  prefillChecklistTotal = 5,
-  prefillSessionSweep = true,
+  prefillChecklistScore = 0,
+  prefillChecklistTotal = 7,
+  prefillSessionSweep = false,
 }) => {
   // Active Tab inside modal
   const [activeTab, setActiveTab] = useState<'main' | 'checklist' | 'notion' | 'photos'>('main');
@@ -118,14 +118,14 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   const [resultTag, setResultTag] = useState<ResultTag>('PROFIT');
   const [mentalState, setMentalState] = useState<MentalState>('NO');
 
-  // Checklist Checkboxes (galochkalar)
-  const [asiaSweep, setAsiaSweep] = useState(true);
-  const [londonSweep, setLondonSweep] = useState(true);
-  const [sessionSweep, setSessionSweep] = useState(true);
-  const [htfFvgOb, setHtfFvgOb] = useState(true);
-  const [ltfConfirmation, setLtfConfirmation] = useState(true);
-  const [clearTarget, setClearTarget] = useState(true);
-  const [riskShieldOk, setRiskShieldOk] = useState(true);
+  // Checklist Checkboxes (galochkalar - barchasi boshida belgilanmagan)
+  const [asiaSweep, setAsiaSweep] = useState(false);
+  const [londonSweep, setLondonSweep] = useState(false);
+  const [sessionSweep, setSessionSweep] = useState(false);
+  const [htfFvgOb, setHtfFvgOb] = useState(false);
+  const [ltfConfirmation, setLtfConfirmation] = useState(false);
+  const [clearTarget, setClearTarget] = useState(false);
+  const [riskShieldOk, setRiskShieldOk] = useState(false);
 
   // Notion Context & Reasons
   const [entryReason, setEntryReason] = useState('');
@@ -235,13 +235,13 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
       setResultTag('PROFIT');
       setMentalState('NO');
 
-      setAsiaSweep(true);
-      setLondonSweep(true);
-      setSessionSweep(prefillSessionSweep);
-      setHtfFvgOb(true);
-      setLtfConfirmation(true);
-      setClearTarget(true);
-      setRiskShieldOk(true);
+      setAsiaSweep(false);
+      setLondonSweep(false);
+      setSessionSweep(prefillSessionSweep || false);
+      setHtfFvgOb(false);
+      setLtfConfirmation(false);
+      setClearTarget(false);
+      setRiskShieldOk(false);
 
       setEntryReason('');
       setSlReason('');
@@ -866,21 +866,21 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                     <div 
                       onClick={() => setSessionSweep(!sessionSweep)}
                       className={`p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
-                        sessionSweep ? 'bg-emerald-950/20 border-emerald-500/40 text-white' : 'bg-rose-950/20 border-rose-500/40 text-white'
+                        sessionSweep ? 'bg-emerald-950/20 border-emerald-500/40 text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        {sessionSweep ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-rose-500 shrink-0" />}
+                        {sessionSweep ? <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0" /> : <Square className="w-4 h-4 text-slate-600 shrink-0" />}
                         <div>
                           <strong className="block text-xs flex items-center gap-1.5">
                             3. Sessiya High / Low Sweep (Asosiy Shart)
                             <span className="text-[10px] bg-rose-500/20 text-rose-400 px-1.5 py-0.2 rounded font-mono">Majburiy</span>
                           </strong>
-                          <span className="text-[11px] text-slate-400">Sweep bo‘lmasa savdoga kirmaslik kerak!</span>
+                          <span className="text-[11px] text-slate-400">Sweep bo‘lsa belgilang (eng muhim signal)</span>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${sessionSweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                        {sessionSweep ? 'SWEEP BOR' : 'SWEEP YO‘Q'}
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${sessionSweep ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-500'}`}>
+                        {sessionSweep ? 'SWEEP BOR' : 'YO‘Q'}
                       </span>
                     </div>
 
