@@ -89,7 +89,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
     }
 
     const sorted = [...trades].sort(
-      (a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime()
+      (a, b) => new Date(`${a.date}T${a.time || '12:00'}`).getTime() - new Date(`${b.date}T${b.time || '12:00'}`).getTime()
     );
 
     // Trade streak
@@ -733,7 +733,7 @@ export const TradifyDashboard: React.FC<TradifyDashboardProps> = ({
                           </span>
                         </div>
                         <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                          {t.date} • {t.time}
+                          {t.date}{t.time ? ` • ${t.time}` : ''}
                         </span>
                       </div>
 

@@ -91,6 +91,15 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
   // Account
   const [accountId, setAccountId] = useState(activeAccountId || 'acc-tradify');
 
+  // Selected Account & Backtest detection
+  const selectedAccount = accounts.find((a) => a.id === accountId);
+  const isBacktest = Boolean(
+    selectedAccount?.market_type === 'backtest' || 
+    selectedAccount?.firm === 'Backtest' || 
+    selectedAccount?.id.includes('backtest') ||
+    selectedAccount?.name.toLowerCase().includes('backtest')
+  );
+
   // Order Name
   const [orderName, setOrderName] = useState('Order');
   const [instrument, setInstrument] = useState('MNQ');
@@ -325,7 +334,7 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
       account_id: accountId,
       account_name: activeAccObj ? activeAccObj.name : 'Tradify 50K',
       date,
-      time,
+      time: isBacktest ? '' : (time || new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', hour12: false })),
       instrument: instrument.trim().toUpperCase(),
       direction,
       quantity: Number(quantity) || 1,
@@ -724,16 +733,21 @@ export const NewTradeModal: React.FC<NewTradeModalProps> = ({
                   </summary>
                   
                   <div className="mt-3 pt-3 border-t border-slate-800/80 space-y-3">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-slate-500 mb-0.5">Vaqt:</label>
-                        <input
-                          type="time"
-                          value={time}
-                          onChange={(e) => setTime(e.target.value)}
-                          className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
-                        />
-                      </div>
+                    <div className={`grid ${isBacktest ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
+                      {!isBacktest && (
+                        <div>
+                          <label className="block text-[10px] text-slate-500 mb-0.5 flex items-center justify-between">
+                            <span>Vaqt:</span>
+                            <span className="text-[9px] text-cyan-400 font-mono">Real vaqt</span>
+                          </label>
+                          <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                            className="w-full bg-[#131b2e] border border-slate-700 rounded-lg px-2 py-1 text-white font-mono text-[11px]"
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-[10px] text-slate-500 mb-0.5">Kontrakt (Qty):</label>
                         <input
