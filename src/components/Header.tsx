@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </h1>
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium">
-                  Professional Savdo Jurnali • <span className="text-emerald-400 font-semibold font-mono">116 ta Sdelkalar</span>
+                  Professional Savdo Jurnali va Intizom Nazorati
                 </p>
               </div>
             </div>
@@ -104,26 +104,21 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile quick actions */}
             <div className="flex items-center space-x-2 lg:hidden">
               <button
-                onClick={onOpenLogin}
-                className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400 hover:text-white"
-                title="Profil va Foydalanuvchi"
-              >
-                <User className="w-4 h-4" />
-              </button>
-              <button
                 onClick={onOpenSettings}
                 className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
                 title="Sozlamalar"
               >
                 <Settings className="w-4 h-4" />
               </button>
-              <button
-                onClick={onOpenNewTrade}
-                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-900/40"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Sdelka</span>
-              </button>
+              {activeTab === 'notion' && (
+                <button
+                  onClick={onOpenNewTrade}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-900/40"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Sdelka</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -259,40 +254,44 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
 
-          {/* Action Buttons: Excel, PDF & New Trade */}
-          <div className="hidden lg:flex items-center space-x-2">
-            <button
-              onClick={onExportExcel}
-              className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-emerald-300 transition-all shadow-sm"
-              title="Excel (.xlsx) formatida yuklab olish"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Excel</span>
-            </button>
+          {/* Action Buttons: Faqat Notion Jurnali ochilganda Excel, PDF va Yangi Sdelka chiqadi */}
+          <div className="flex items-center space-x-2 shrink-0">
+            {activeTab === 'notion' && (
+              <>
+                <button
+                  onClick={onExportExcel}
+                  className="hidden sm:flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-emerald-300 transition-all shadow-sm"
+                  title="Excel (.xlsx) formatida yuklab olish"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Excel</span>
+                </button>
 
-            <button
-              onClick={onExportPDF}
-              className="flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-rose-400 transition-all shadow-sm"
-              title="PDF (.pdf) hisobotini yuklab olish"
-            >
-              <FileText className="w-3.5 h-3.5 text-rose-400" />
-              <span>PDF</span>
-            </button>
+                <button
+                  onClick={onExportPDF}
+                  className="hidden sm:flex items-center gap-1 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:text-rose-400 transition-all shadow-sm"
+                  title="PDF (.pdf) hisobotini yuklab olish"
+                >
+                  <FileText className="w-3.5 h-3.5 text-rose-400" />
+                  <span>PDF</span>
+                </button>
+
+                <button
+                  onClick={onOpenNewTrade}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Yangi Sdelka</span>
+                </button>
+              </>
+            )}
 
             <button
               onClick={onOpenSettings}
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all"
+              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-all shrink-0"
               title="Sozlamalar va Supabase"
             >
               <Settings className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={onOpenNewTrade}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ Yangi Sdelka</span>
             </button>
           </div>
         </div>
